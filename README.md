@@ -23,18 +23,13 @@
 
 [//]: # (<h2 align="center">)
 
-[![Trophy](https://github-profile-trophy.vercel.app/?username=VladyslavPilkevych&theme=juicyfresh&no-frame=true)](https://github.com/ryo-ma/github-profile-trophy)
+![Trophy](https://github-profile-trophy.vercel.app/?username=VladyslavPilkevych&theme=juicyfresh&no-frame=true)
 
 ![Profile Summary](https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=VladyslavPilkevych&theme=dark)
 
-[//]: # ([![Top Langs]&#40;https://github-readme-stats.vercel.app/api/top-langs/?username=VladyslavPilkevych&layout=compact&theme=dark&hide_border=true&#41;]&#40;https://github.com/anuraghazra/github-readme-stats&#41;)
+![GitHub Streak](https://github-readme-streak-stats.herokuapp.com?user=VladyslavPilkevych&theme=dark&hide_border=true&hide_current_streak=true)
 
-[![GitHub Streak](https://github-readme-streak-stats.herokuapp.com?user=VladyslavPilkevych&theme=dark&hide_border=true&hide_current_streak=true)](https://git.io/streak-stats) <br/>
-
-
-![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=VladyslavPilkevych&show_icons=true&theme=dark&hide_border=true)
-
-[![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=VladyslavPilkevych&theme=github-compact&area=true&area_color=00FF00&color=00FF00)](https://github.com/ashutosh00710/github-readme-activity-graph)<br/>
+![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=VladyslavPilkevych&theme=github-compact&area=true&area_color=00FF00&color=00FF00)
 
 ## Skills & Technologies
 
@@ -57,4 +52,17 @@
 ### OS
 
 [![My Skills](https://skillicons.dev/icons?i=windows,linux&perline=4)](https://skillicons.dev)
+
+<br />
+
+## Pinned
+
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=personal-website&hide_border=true&theme=moltack&description_lines_count=3)](https://github.com/VladyslavPilkevych/personal-website)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=RickAndMortyTable&hide_border=true&theme=ambient_gradient&description_lines_count=3)](https://github.com/VladyslavPilkevych/RickAndMortyTable)
+
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=final-project-online-shop&hide_border=true&theme=yeblu)](https://github.com/VladyslavPilkevych/final-project-online-shop)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=DSA&hide_border=true&theme=midnight-purple)](https://github.com/VladyslavPilkevych/DSA)
+
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=movie-app&hide_border=true&theme=shades-of-purple&description_lines_count=3)](https://github.com/VladyslavPilkevych/movie-app)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=movie-app-be&hide_border=true&theme=shades-of-purple&description_lines_count=3)](https://github.com/VladyslavPilkevych/movie-app-be)
 
