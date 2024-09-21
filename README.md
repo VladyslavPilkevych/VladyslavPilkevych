@@ -60,8 +60,8 @@
 [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=personal-website&hide_border=true&theme=moltack&description_lines_count=3)](https://github.com/VladyslavPilkevych/personal-website)
 [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=RickAndMortyTable&hide_border=true&theme=ambient_gradient&description_lines_count=3)](https://github.com/VladyslavPilkevych/RickAndMortyTable)
 
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=final-project-online-shop&hide_border=true&theme=yeblu)](https://github.com/VladyslavPilkevych/final-project-online-shop)
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=DSA&hide_border=true&theme=midnight-purple)](https://github.com/VladyslavPilkevych/DSA)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=C-Projects&hide_border=true&theme=yeblu&description_lines_count=2)](https://github.com/VladyslavPilkevych/C-Projects)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=DSA&hide_border=true&theme=midnight-purple&description_lines_count=2)](https://github.com/VladyslavPilkevych/DSA)
 
 [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=movie-app&hide_border=true&theme=shades-of-purple&description_lines_count=3)](https://github.com/VladyslavPilkevych/movie-app)
 [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=VladyslavPilkevych&repo=movie-app-be&hide_border=true&theme=shades-of-purple&description_lines_count=3)](https://github.com/VladyslavPilkevych/movie-app-be)
