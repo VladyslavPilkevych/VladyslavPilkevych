@@ -16,20 +16,26 @@
   </a>
 </p>
 
-<br />
+---
 
 ## GitHub Stats
 
+![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=VladyslavPilkevych&theme=github-compact&area=true&area_color=00FF00&color=00FF00)
+
+![Trophy](https://github-profile-trophy.vercel.app/?username=VladyslavPilkevych&theme=juicyfresh&no-frame=true)
+
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=VladyslavPilkevych&show_icons=true&theme=dark&hide_border=true)
+
+![Productivity Score](https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=VladyslavPilkevych&theme=dark&utcOffset=4)
 
 [//]: # (<h2 align="center">)
 
-![Trophy](https://github-profile-trophy.vercel.app/?username=VladyslavPilkevych&theme=juicyfresh&no-frame=true)
 
 ![Profile Summary](https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=VladyslavPilkevych&theme=dark)
 
 ![GitHub Streak](https://github-readme-streak-stats.herokuapp.com?user=VladyslavPilkevych&theme=dark&hide_border=true&hide_current_streak=true)
 
-![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=VladyslavPilkevych&theme=github-compact&area=true&area_color=00FF00&color=00FF00)
+---
 
 ## Skills & Technologies
 
@@ -53,7 +59,7 @@
 
 [![My Skills](https://skillicons.dev/icons?i=windows,linux&perline=4)](https://skillicons.dev)
 
-<br />
+---
 
 ## Pinned
 
