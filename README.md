@@ -33,8 +33,6 @@
 
 ![Profile Summary](https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=VladyslavPilkevych&theme=dark)
 
-![GitHub Streak](https://github-readme-streak-stats.herokuapp.com?user=VladyslavPilkevych&theme=dark&hide_border=true&hide_current_streak=true)
-
 ---
 
 ## Skills & Technologies
