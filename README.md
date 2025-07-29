@@ -51,7 +51,7 @@
 
 ### Programs & Tools
 
-[![My Skills](https://skillicons.dev/icons?i=git,gitlab,github,vscode,idea,bitbucket,npm&perline=4)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=git,gitlab,github,vscode,idea,bitbucket,npm,pnpm,sqlite,figma,eclipse,clion&perline=4)](https://skillicons.dev)
 
 ### OS
 
