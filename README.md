@@ -55,7 +55,7 @@
 
 ### OS
 
-[![My Skills](https://skillicons.dev/icons?i=windows,linux&perline=4)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=windows,linux,apple&perline=4)](https://skillicons.dev)
 
 ---
 
