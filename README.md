@@ -31,7 +31,7 @@
 
 ![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=VladyslavPilkevych&theme=github-compact&area=true&area_color=00FF00&color=00FF00)
 
-![Trophy](https://github-profile-trophy.vercel.app/?username=VladyslavPilkevych&theme=juicyfresh&no-frame=true)
+<!-- ![Trophy](https://github-profile-trophy.vercel.app/?username=VladyslavPilkevych&theme=juicyfresh&no-frame=true) -->
 
 ![GitHub Stats](https://github-readme-stats-gray-eta-83.vercel.app/api?username=VladyslavPilkevych&show_icons=true&theme=dark&hide_border=true&v=1)
 
