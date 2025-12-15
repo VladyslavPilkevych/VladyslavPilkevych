@@ -5,15 +5,15 @@
   />
 </div>
 <br />
-<div align="center" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+<div align="center" style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap">
   <a href="https://www.linkedin.com/in/vladyslav-pilkevych-4409b5236" target="_blank">
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
   </a>
-  <a href="mailto:vladyslav.pilkevych@gmail.com" target="_blank">
-    <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" />
-  </a>
   <a href="https://vladyslavpilkevych.github.io/personal-website/" target="_blank">
     <img src="https://img.shields.io/badge/Check%20Out%20My%20Website-grey?style=for-the-badge&logo=rocket" />
+  </a>
+  <a href="mailto:vladyslav.pilkevych@gmail.com" target="_blank">
+    <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" />
   </a>
 </div>
 <br />
@@ -104,7 +104,7 @@
 <hr />
 <br />
 <h2 align="center">Pinned</h2>
-<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(350px,1fr)); gap:12px;">
+<div style="display:flex; flex-wrap: wrap; justify-content: space-around;">
   <a href="https://github.com/VladyslavPilkevych/personal-website" target="_blank">
     <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=personal-website&hide_border=true&theme=moltack&description_lines_count=3" />
   </a>
