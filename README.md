@@ -5,17 +5,11 @@
   />
 </div>
 <br />
-<div align="center" style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap">
-  <a href="https://www.linkedin.com/in/vladyslav-pilkevych-4409b5236" target="_blank">
-    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
-  </a>
-  <a href="https://vladyslavpilkevych.github.io/personal-website/" target="_blank">
-    <img src="https://img.shields.io/badge/Check%20Out%20My%20Website-grey?style=for-the-badge&logo=rocket" />
-  </a>
-  <a href="mailto:vladyslav.pilkevych@gmail.com" target="_blank">
-    <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" />
-  </a>
-</div>
+<p align="center">
+  <a href="https://www.linkedin.com/in/vladyslav-pilkevych-4409b5236" target="_blank" rel="noreferrer"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>&nbsp;&nbsp;
+  <a href="https://vladyslavpilkevych.github.io/personal-website/" target="_blank" rel="noreferrer"><img src="https://img.shields.io/badge/Check%20Out%20My%20Website-grey?style=for-the-badge&logo=rocket" /></a>&nbsp;&nbsp;
+  <a href="mailto:vladyslav.pilkevych@gmail.com"><img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" /></a>
+</p>
 <br />
 <div align="center">
   <a href="https://git.io/typing-svg" target="_blank">
@@ -104,38 +98,69 @@
 <hr />
 <br />
 <h2 align="center">Pinned</h2>
-<div style="display:flex; flex-wrap: wrap; justify-content: space-around;">
-  <a href="https://github.com/VladyslavPilkevych/personal-website" target="_blank">
-    <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=personal-website&hide_border=true&theme=moltack&description_lines_count=3" />
-  </a>
-  <a href="https://github.com/VladyslavPilkevych/RickAndMortyTable" target="_blank">
-    <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=RickAndMortyTable&hide_border=true&theme=ambient_gradient&description_lines_count=3" />
-  </a>
-  <a href="https://github.com/VladyslavPilkevych/C-Projects" target="_blank">
-    <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=C-Projects&hide_border=true&theme=yeblu&description_lines_count=2" />
-  </a>
-  <a href="https://github.com/VladyslavPilkevych/DSA" target="_blank">
-    <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=DSA&hide_border=true&theme=midnight-purple&description_lines_count=2" />
-  </a>
-  <a href="https://github.com/VladyslavPilkevych/LeetCodeSolutionsHub" target="_blank">
-    <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=LeetCodeSolutionsHub&hide_border=true&theme=swift&description_lines_count=3" />
-  </a>
-  <a href="https://github.com/VladyslavPilkevych/CodeWars-Chronicles" target="_blank">
-    <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=CodeWars-Chronicles&hide_border=true&theme=kacho_ga&description_lines_count=3" />
-  </a>
-  <a href="https://github.com/VladyslavPilkevych/UniversityJavaOOP" target="_blank">
-    <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=UniversityJavaOOP&hide_border=true&theme=blueberry&description_lines_count=3&v=1" />
-  </a>
-  <a href="https://github.com/VladyslavPilkevych/adm-algorithms" target="_blank">
-    <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=adm-algorithms&hide_border=true&theme=holi&description_lines_count=3&v=1" />
-  </a>
-  <a href="https://github.com/VladyslavPilkevych/movie-app" target="_blank">
-    <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=movie-app&hide_border=true&theme=shades-of-purple&description_lines_count=3&v=1" />
-  </a>
-  <a href="https://github.com/VladyslavPilkevych/CinemaCrit" target="_blank">
-    <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=CinemaCrit&hide_border=true&theme=panda&description_lines_count=3&v=1" />
-  </a>
-</div>
+<table align="center">
+  <tr>
+    <td>
+      <a href="https://github.com/VladyslavPilkevych/personal-website" target="_blank" rel="noreferrer">
+        <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=personal-website&hide_border=true&theme=moltack&description_lines_count=3" />
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/VladyslavPilkevych/RickAndMortyTable" target="_blank" rel="noreferrer">
+        <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=RickAndMortyTable&hide_border=true&theme=ambient_gradient&description_lines_count=3" />
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/VladyslavPilkevych/C-Projects" target="_blank" rel="noreferrer">
+        <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=C-Projects&hide_border=true&theme=yeblu&description_lines_count=2" />
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/VladyslavPilkevych/DSA" target="_blank" rel="noreferrer">
+        <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=DSA&hide_border=true&theme=midnight-purple&description_lines_count=2" />
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/VladyslavPilkevych/LeetCodeSolutionsHub" target="_blank" rel="noreferrer">
+        <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=LeetCodeSolutionsHub&hide_border=true&theme=swift&description_lines_count=3" />
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/VladyslavPilkevych/CodeWars-Chronicles" target="_blank" rel="noreferrer">
+        <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=CodeWars-Chronicles&hide_border=true&theme=kacho_ga&description_lines_count=3" />
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/VladyslavPilkevych/UniversityJavaOOP" target="_blank" rel="noreferrer">
+        <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=UniversityJavaOOP&hide_border=true&theme=blueberry&description_lines_count=3&v=1" />
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/VladyslavPilkevych/adm-algorithms" target="_blank" rel="noreferrer">
+        <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=adm-algorithms&hide_border=true&theme=holi&description_lines_count=3&v=1" />
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/VladyslavPilkevych/movie-app" target="_blank" rel="noreferrer">
+        <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=movie-app&hide_border=true&theme=shades-of-purple&description_lines_count=3&v=1" />
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/VladyslavPilkevych/CinemaCrit" target="_blank" rel="noreferrer">
+        <img src="https://github-readme-stats-gray-eta-83.vercel.app/api/pin/?username=VladyslavPilkevych&repo=CinemaCrit&hide_border=true&theme=panda&description_lines_count=3&v=1" />
+      </a>
+    </td>
+  </tr>
+</table>
+
 <!-- <h2 align="center">GitHub Activity</h2>
 <div align="center">
   <img
