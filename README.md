@@ -161,6 +161,11 @@
   </tr>
 </table>
 
+
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=150&section=footer" width="100%" />
+</div>
+
 <!-- <h2 align="center">GitHub Activity</h2>
 <div align="center">
   <img
