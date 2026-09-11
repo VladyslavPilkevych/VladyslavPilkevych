@@ -1,0 +1,37 @@
+{
+  "name": "terminal-profile",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Self-contained generator that renders a terminal-style GitHub profile into static SVG.",
+  "packageManager": "pnpm@11.18.0",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "generate": "tsx src/index.ts",
+    "generate:fixture": "tsx src/index.ts --fixture",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test"
+  },
+  "dependencies": {
+    "sharp": "^0.34.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.7",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^3.2.4"
+  }
+}

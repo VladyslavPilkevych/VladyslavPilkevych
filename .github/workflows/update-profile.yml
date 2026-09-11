@@ -1,0 +1,75 @@
+name: Update profile
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'fixtures/**'
+      - 'profile.config.ts'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'tsconfig.json'
+      - '.github/workflows/update-profile.yml'
+
+concurrency:
+  group: update-profile
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate
+        run: pnpm typecheck && pnpm lint && pnpm test
+
+      - name: Generate profile
+        env:
+          PROFILE_GITHUB_TOKEN: ${{ secrets.PROFILE_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm generate
+
+      - name: Detect generated changes
+        id: diff
+        run: |
+          if git diff --quiet -- generated; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Generated SVGs are unchanged."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --stat -- generated
+          fi
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add generated
+          git commit -m "chore(profile): refresh generated SVG [skip ci]"
+          git push
