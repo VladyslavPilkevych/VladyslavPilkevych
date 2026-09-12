@@ -1,7 +1,8 @@
-import { h, type SvgElement } from '../../svg/jsx.ts';
+import { h, type SvgChild, type SvgElement } from '../../svg/jsx.ts';
 import type { Palette } from '../../config/types.ts';
 import type { ContributionCalendar, ContributionLevel } from '../../data/types.ts';
 import type { Metrics } from '../layout.ts';
+import { seconds, type Motion } from '../animation.ts';
 import { monthAbbreviation, parseCalendarDate } from '../../utils/dates.ts';
 import { visualLength } from '../../utils/text.ts';
 import { Text } from './primitives.tsx';
@@ -13,6 +14,9 @@ export interface ContributionGraphProps {
   calendar: ContributionCalendar;
   metrics: Metrics;
   palette: Palette;
+  motion: Motion;
+  begin: number;
+  duration: number;
 }
 
 const DAY_LABEL_COLUMNS = 4;
@@ -81,7 +85,7 @@ export function monthLabelPositions(
 }
 
 export function ContributionGraph(props: ContributionGraphProps): SvgElement {
-  const { calendar, metrics, palette } = props;
+  const { calendar, metrics, palette, motion } = props;
   const geometry = graphGeometry(calendar.weeks.length, props.width, metrics);
   const gridLeft = props.x + geometry.gridX;
   const gridTop = props.y + MONTH_LABEL_HEIGHT;
@@ -112,13 +116,17 @@ export function ContributionGraph(props: ContributionGraphProps): SvgElement {
   );
 
   const cells: SvgElement[] = [];
+  const positions: { x: number; y: number }[] = [];
   calendar.weeks.forEach((week, weekIndex) => {
     week.forEach((day, dayIndex) => {
       if (!day) return;
+      const cellX = gridLeft + weekIndex * geometry.pitch;
+      const cellY = gridTop + dayIndex * step;
+      positions.push({ x: cellX, y: cellY });
       cells.push(
         <rect
-          x={gridLeft + weekIndex * geometry.pitch}
-          y={gridTop + dayIndex * step}
+          x={cellX}
+          y={cellY}
           width={geometry.cell}
           height={geometry.cell}
           rx={2.5}
@@ -128,6 +136,76 @@ export function ContributionGraph(props: ContributionGraphProps): SvgElement {
       );
     });
   });
+
+  const clipId = 'tp-graph-wipe';
+  const grid: SvgChild = motion.enabled ? (
+    <g>
+      <clipPath id={clipId}>
+        <rect
+          x={gridLeft - 2}
+          y={gridTop - 2}
+          width={geometry.gridWidth + 4}
+          height={geometry.gridHeight + 4}
+        >
+          {motion.grow('width', props.begin, props.duration, geometry.gridWidth + 4)}
+        </rect>
+      </clipPath>
+      <g clip-path={`url(#${clipId})`}>{cells}</g>
+      <rect
+        x={gridLeft - 1}
+        y={gridTop - 2}
+        width={2}
+        height={geometry.gridHeight + 4}
+        fill={palette.accent}
+        opacity={0}
+      >
+        <animate
+          attributeName="opacity"
+          values="0;0.75;0.75;0"
+          keyTimes="0;0.05;0.9;1"
+          begin={seconds(props.begin)}
+          dur={seconds(props.duration)}
+          fill="freeze"
+        />
+        <animateTransform
+          attributeName="transform"
+          type="translate"
+          values={`0 0;${String(Math.round(geometry.gridWidth))} 0`}
+          begin={seconds(props.begin)}
+          dur={seconds(props.duration)}
+          fill="freeze"
+        />
+      </rect>
+    </g>
+  ) : (
+    <g>{cells}</g>
+  );
+
+  const latest = positions[positions.length - 1];
+  const todayPulse: SvgChild =
+    motion.enabled && latest ? (
+      <rect
+        x={latest.x - 1.5}
+        y={latest.y - 1.5}
+        width={geometry.cell + 3}
+        height={geometry.cell + 3}
+        rx={3.5}
+        ry={3.5}
+        fill="none"
+        stroke={palette.accent}
+        stroke-width={1.2}
+        opacity={0}
+      >
+        <animate
+          attributeName="opacity"
+          values="0;0.9;0.15;0.9"
+          keyTimes="0;0.2;0.6;1"
+          begin={seconds(props.begin + props.duration)}
+          dur={seconds(3.2)}
+          repeatCount="indefinite"
+        />
+      </rect>
+    ) : null;
 
   const legendY = gridTop + geometry.gridHeight + 15;
   const legendCell = Math.min(11, geometry.cell);
@@ -148,34 +226,41 @@ export function ContributionGraph(props: ContributionGraphProps): SvgElement {
 
   return (
     <g>
-      {monthLabels}
-      {weekdayLabels}
-      {cells}
-      <Text
-        x={props.x}
-        y={legendY}
-        value={`${calendar.from}  ..  ${calendar.to}`}
-        fill={palette.textDim}
-        cellWidth={metrics.cellWidth * 0.82}
-        fontSize={metrics.fontSize - 2}
-      />
-      <Text
-        x={legendX}
-        y={legendY}
-        value="less"
-        fill={palette.textDim}
-        cellWidth={metrics.cellWidth * 0.78}
-        fontSize={metrics.fontSize - 3}
-      />
-      {legendCells}
-      <Text
-        x={legendX + legendLabelWidth + 16 + 5 * (legendCell + 3)}
-        y={legendY}
-        value="more"
-        fill={palette.textDim}
-        cellWidth={metrics.cellWidth * 0.78}
-        fontSize={metrics.fontSize - 3}
-      />
+      <g>
+        {monthLabels}
+        {weekdayLabels}
+        {motion.fadeIn(Math.max(0, props.begin - 0.12), 0.3)}
+      </g>
+      {grid}
+      {todayPulse}
+      <g>
+        <Text
+          x={props.x}
+          y={legendY}
+          value={`${calendar.from}  ..  ${calendar.to}`}
+          fill={palette.textDim}
+          cellWidth={metrics.cellWidth * 0.82}
+          fontSize={metrics.fontSize - 2}
+        />
+        <Text
+          x={legendX}
+          y={legendY}
+          value="less"
+          fill={palette.textDim}
+          cellWidth={metrics.cellWidth * 0.78}
+          fontSize={metrics.fontSize - 3}
+        />
+        {legendCells}
+        <Text
+          x={legendX + legendLabelWidth + 16 + 5 * (legendCell + 3)}
+          y={legendY}
+          value="more"
+          fill={palette.textDim}
+          cellWidth={metrics.cellWidth * 0.78}
+          fontSize={metrics.fontSize - 3}
+        />
+        {motion.fadeIn(props.begin + props.duration * 0.6, 0.35)}
+      </g>
     </g>
   );
 }

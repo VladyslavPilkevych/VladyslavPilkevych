@@ -3,11 +3,13 @@ import { serializeDocument } from '../svg/serialize.ts';
 import type { Palette, ProfileConfig, ThemeName } from '../config/types.ts';
 import type { ProfileData } from '../data/types.ts';
 import { buildMetrics, resolvePalette, splitColumns, type Metrics } from './layout.ts';
+import { createMotion, type Motion } from './animation.ts';
+import { buildTimeline, type Timeline } from './timeline.ts';
 import { buildStatRows } from './statRows.ts';
 import { SectionHeader, sectionHeaderHeight } from './components/SectionHeader.tsx';
 import { TerminalChrome } from './components/TerminalChrome.tsx';
-import { AsciiAvatar, asciiAvatarHeight, asciiAvatarWidth } from './components/AsciiAvatar.tsx';
-import { Identity, identityHeight } from './components/Identity.tsx';
+import { ASCII_SCAN_GRADIENT_ID, AsciiScanGradient } from './components/AsciiAvatar.tsx';
+import { IdentityPanel, identityPanelHeight } from './components/Identity.tsx';
 import { GitHubStats, statsHeight } from './components/GitHubStats.tsx';
 import { LanguageStats, languageStatsHeight } from './components/LanguageStats.tsx';
 import { TechStack, stackRows, techStackHeight } from './components/TechStack.tsx';
@@ -15,30 +17,38 @@ import { ContributionGraph, contributionGraphHeight } from './components/Contrib
 import { RecentActivity, recentActivityHeight } from './components/RecentActivity.tsx';
 import { FeaturedRepositories, featuredHeight } from './components/FeaturedRepositories.tsx';
 import { Footer, footerHeight } from './components/Footer.tsx';
+import { Rule } from './components/primitives.tsx';
 import { parseCalendarDate } from '../utils/dates.ts';
 import { formatCount } from '../utils/numbers.ts';
 
-const ASCII_GRADIENT_ID = 'terminal-profile-portrait';
+const ASCII_GRADIENT_ID = 'tp-portrait';
 
 interface SectionContext {
   nodes: SvgChild[];
   cursor: number;
+  dividers: number[];
 }
 
 interface SectionOptions {
   command: string;
   note: string | null;
   bodyHeight: number;
+  headerBegin: number;
   body: (y: number) => SvgChild;
+  idPrefix: string;
 }
 
 function section(
   context: SectionContext,
   metrics: Metrics,
   palette: Palette,
+  motion: Motion,
   promptSymbol: string,
   options: SectionOptions,
 ): void {
+  if (context.nodes.length > 0) {
+    context.dividers.push(context.cursor - metrics.sectionGap / 2);
+  }
   context.nodes.push(
     <SectionHeader
       x={metrics.contentLeft}
@@ -49,6 +59,9 @@ function section(
       note={options.note}
       metrics={metrics}
       palette={palette}
+      motion={motion}
+      begin={options.headerBegin}
+      idPrefix={options.idPrefix}
     />,
   );
   const bodyY = context.cursor + sectionHeaderHeight(metrics);
@@ -59,7 +72,13 @@ function section(
 export function renderProfile(data: ProfileData, config: ProfileConfig, theme: ThemeName): string {
   const metrics = buildMetrics(config);
   const palette = resolvePalette(config, theme);
-  const context: SectionContext = { nodes: [], cursor: metrics.chromeHeight + metrics.padding };
+  const motion = createMotion(config.animation);
+  const timeline: Timeline = buildTimeline(config.animation);
+  const context: SectionContext = {
+    nodes: [],
+    cursor: metrics.chromeHeight + metrics.padding,
+    dividers: [],
+  };
 
   const year = parseCalendarDate(data.contributions.to).year;
   const statRows = buildStatRows(data.stats, year);
@@ -68,56 +87,32 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
   const identityFields = config.sections.identity ? data.identityFields : [];
 
   if (portrait || identityFields.length > 0) {
-    const portraitWidth = portrait ? asciiAvatarWidth(portrait, metrics) : 0;
-    const heroTop = context.cursor;
-    const identityX = portrait
-      ? metrics.contentLeft + portraitWidth + metrics.columnGap
-      : metrics.contentLeft;
-    const identityWidth = metrics.contentRight - identityX;
-    const portraitHeight = portrait ? asciiAvatarHeight(portrait, metrics) : 0;
-    const identityBlockHeight =
-      identityFields.length > 0 ? identityHeight(identityFields, metrics) : 0;
-    const rowHeight = Math.max(portraitHeight, identityBlockHeight);
-    const identityOffset = Math.max(0, (rowHeight - identityBlockHeight) / 2);
-    context.nodes.push(
-      <SectionHeader
-        x={metrics.contentLeft}
-        y={heroTop}
-        width={metrics.innerWidth}
-        command="whoami --system"
-        promptSymbol={config.terminal.promptSymbol}
-        note={`github.com/${data.identity.login}`}
-        metrics={metrics}
-        palette={palette}
-      />,
-    );
-    const top = heroTop + sectionHeaderHeight(metrics);
-    if (portrait) {
-      context.nodes.push(
-        <AsciiAvatar
+    section(context, metrics, palette, motion, config.terminal.promptSymbol, {
+      command: 'whoami --system',
+      note: `github.com/${data.identity.login}`,
+      headerBegin: timeline.hero.header,
+      idPrefix: 'tp-hero',
+      bodyHeight: identityPanelHeight(portrait, identityFields, metrics),
+      body: (y) => (
+        <IdentityPanel
           x={metrics.contentLeft}
-          y={top}
+          y={y}
+          width={metrics.innerWidth}
           portrait={portrait}
-          metrics={metrics}
-          fill={`url(#${ASCII_GRADIENT_ID})`}
-        />,
-      );
-    }
-    if (identityFields.length > 0) {
-      context.nodes.push(
-        <Identity
-          x={identityX}
-          y={top + identityOffset}
-          width={identityWidth}
           fields={identityFields}
           login={data.identity.login}
           terminal={config.terminal}
           metrics={metrics}
           palette={palette}
-        />,
-      );
-    }
-    context.cursor = top + rowHeight + metrics.sectionGap;
+          motion={motion}
+          portraitFill={`url(#${ASCII_GRADIENT_ID})`}
+          begin={timeline.identity.body}
+          avatarBegin={timeline.avatar.begin}
+          avatarDuration={timeline.avatar.duration}
+          stagger={timeline.identity.stagger}
+        />
+      ),
+    });
   }
 
   const showStats = config.sections.githubStats && statRows.length > 0;
@@ -126,17 +121,17 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
     const columns = splitColumns(metrics, [1, 1]);
     const left = columns[0];
     const right = columns[1];
-    const bodyHeight = Math.max(
-      showStats ? statsHeight(statRows, metrics) : 0,
-      showLanguages ? languageStatsHeight(data.languages.entries, metrics) : 0,
-    );
-    const note = showLanguages
-      ? `${String(data.languages.repositoriesCounted)} repositories analysed`
-      : null;
-    section(context, metrics, palette, config.terminal.promptSymbol, {
+    section(context, metrics, palette, motion, config.terminal.promptSymbol, {
       command: 'gh stats --telemetry',
-      note,
-      bodyHeight,
+      note: showLanguages
+        ? `${String(data.languages.repositoriesCounted)} repositories analysed`
+        : null,
+      headerBegin: timeline.stats.header,
+      idPrefix: 'tp-stats',
+      bodyHeight: Math.max(
+        showStats ? statsHeight(statRows, metrics) : 0,
+        showLanguages ? languageStatsHeight(data.languages.entries, metrics) : 0,
+      ),
       body: (y) => (
         <g>
           {showStats && left ? (
@@ -147,6 +142,9 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
               rows={statRows}
               metrics={metrics}
               palette={palette}
+              motion={motion}
+              begin={timeline.stats.body}
+              stagger={timeline.stats.stagger}
             />
           ) : null}
           {showLanguages && right ? (
@@ -157,6 +155,10 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
               entries={data.languages.entries}
               metrics={metrics}
               palette={palette}
+              motion={motion}
+              begin={timeline.bars.begin}
+              duration={timeline.bars.duration}
+              stagger={timeline.bars.stagger}
             />
           ) : null}
         </g>
@@ -165,9 +167,11 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
   }
 
   if (config.sections.techStack && stackRows(config.stack).length > 0) {
-    section(context, metrics, palette, config.terminal.promptSymbol, {
+    section(context, metrics, palette, motion, config.terminal.promptSymbol, {
       command: 'stack --list',
       note: 'configured by hand, not inferred',
+      headerBegin: timeline.stack.header,
+      idPrefix: 'tp-stackcmd',
       bodyHeight: techStackHeight(config.stack, metrics),
       body: (y) => (
         <TechStack
@@ -177,20 +181,24 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
           stack={config.stack}
           metrics={metrics}
           palette={palette}
+          motion={motion}
+          begin={timeline.stack.body}
+          stagger={timeline.stack.stagger}
         />
       ),
     });
   }
 
   if (config.sections.contributionGraph) {
-    const streak = data.streaks.current;
     const note =
       `${formatCount(data.contributions.total)} contributions  ·  ` +
       `${formatCount(data.stats.activeDaysLastYear)} active days  ·  ` +
-      `streak ${String(streak)}d / max ${String(data.streaks.longest)}d`;
-    section(context, metrics, palette, config.terminal.promptSymbol, {
+      `streak ${String(data.streaks.current)}d / max ${String(data.streaks.longest)}d`;
+    section(context, metrics, palette, motion, config.terminal.promptSymbol, {
       command: 'gh contributions --range 12m',
       note,
+      headerBegin: timeline.graph.header,
+      idPrefix: 'tp-graph',
       bodyHeight: contributionGraphHeight(data.contributions, metrics.innerWidth, metrics),
       body: (y) => (
         <ContributionGraph
@@ -200,6 +208,9 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
           calendar={data.contributions}
           metrics={metrics}
           palette={palette}
+          motion={motion}
+          begin={timeline.graph.body}
+          duration={timeline.graph.duration}
         />
       ),
     });
@@ -211,14 +222,15 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
     const columns = splitColumns(metrics, [1, 1]);
     const left = columns[0];
     const right = columns[1];
-    const bodyHeight = Math.max(
-      showActivity ? recentActivityHeight(data.activity, metrics) : 0,
-      showFeatured ? featuredHeight(data.featured, metrics) : 0,
-    );
-    section(context, metrics, palette, config.terminal.promptSymbol, {
+    section(context, metrics, palette, motion, config.terminal.promptSymbol, {
       command: 'git log --recent',
       note: 'public events',
-      bodyHeight,
+      headerBegin: timeline.activity.header,
+      idPrefix: 'tp-activity',
+      bodyHeight: Math.max(
+        showActivity ? recentActivityHeight(data.activity, metrics) : 0,
+        showFeatured ? featuredHeight(data.featured, metrics) : 0,
+      ),
       body: (y) => (
         <g>
           {showActivity && left ? (
@@ -229,6 +241,9 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
               entries={data.activity}
               metrics={metrics}
               palette={palette}
+              motion={motion}
+              begin={timeline.activity.body}
+              stagger={timeline.activity.stagger}
             />
           ) : null}
           {showFeatured && right ? (
@@ -239,6 +254,9 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
               repositories={data.featured}
               metrics={metrics}
               palette={palette}
+              motion={motion}
+              begin={timeline.activity.body}
+              stagger={timeline.activity.stagger}
             />
           ) : null}
         </g>
@@ -247,6 +265,7 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
   }
 
   const footerTop = context.cursor;
+  context.dividers.push(footerTop - metrics.sectionGap / 2);
   context.nodes.push(
     <Footer
       x={metrics.contentLeft}
@@ -255,11 +274,23 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
       terminal={config.terminal}
       metrics={metrics}
       palette={palette}
+      motion={motion}
+      begin={timeline.footer}
     />,
   );
   const totalHeight = Math.round(
     footerTop + footerHeight(config.terminal, metrics) + metrics.padding,
   );
+
+  const dividers = context.dividers.map((y) => (
+    <Rule
+      x={metrics.contentLeft}
+      y={Math.round(y)}
+      width={metrics.innerWidth}
+      color={palette.border}
+      opacity={0.55}
+    />
+  ));
 
   const displayName = data.identity.name ?? data.identity.login;
   const document = (
@@ -281,6 +312,7 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
           <stop offset="55%" stop-color={palette.textMuted} />
           <stop offset="100%" stop-color={palette.accent} />
         </linearGradient>
+        <AsciiScanGradient id={ASCII_SCAN_GRADIENT_ID} palette={palette} />
       </defs>
       <rect
         x={0.5}
@@ -296,8 +328,10 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
         metrics={metrics}
         palette={palette}
         terminal={config.terminal}
-        totalHeight={totalHeight}
+        motion={motion}
+        begin={timeline.chrome}
       />
+      {dividers}
       {context.nodes}
     </svg>
   );

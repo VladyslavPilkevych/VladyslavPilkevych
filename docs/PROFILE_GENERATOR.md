@@ -13,6 +13,8 @@ and the only artefacts are `generated/profile-dark.svg` and `generated/profile-l
 pnpm install        # install dependencies from the lockfile
 pnpm generate       # fetch live GitHub data and write generated/*.svg
 pnpm generate:fixture  # render from fixtures/profile.fixture.ts, no network access
+pnpm frames generated/profile-dark.svg .cache/frames "0,0.7,1.9,3.3,4.8,6.5"
+                    # capture animation frames in headless Chrome as a contact sheet
 pnpm test           # vitest
 pnpm typecheck      # tsc --noEmit
 pnpm lint           # eslint
@@ -39,6 +41,8 @@ src/avatar/*                 avatar download and ASCII conversion
 src/data/buildProfileData.ts normalised ProfileData model
         |
 src/renderer/*               TSX components that emit an SVG element tree
+src/renderer/animation.ts    SMIL helpers (the Motion object)
+src/renderer/timeline.ts     absolute entrance timings derived from configuration
 src/svg/*                    JSX runtime and serializer that escapes by construction
         |
 src/validate/validateSvg.ts  structural checks on the produced document
@@ -57,6 +61,105 @@ monospace font the viewer happens to have. Every text run therefore carries an e
 The renderer fixes the exact pixel width of each run, so columns line up on any machine and text can
 never overflow its column, regardless of which font resolves from the stack. No font files are
 downloaded at render time or embedded in the output.
+
+## Animation
+
+The profile is a running terminal, not a screenshot. Motion is pure SMIL — `<animate>` and
+`<animateTransform>` only. There is no JavaScript, no `<style>` block and no CSS `@keyframes`,
+because an SVG shown through a GitHub README is rendered as an image and must not depend on
+scripting.
+
+### The Motion object
+
+`src/renderer/animation.ts` exports `createMotion(config.animation)`, which returns a small set of
+helpers that components call instead of writing SMIL by hand:
+
+| Helper                                       | Produces                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `fadeIn(begin, duration)`                    | opacity 0 to 1, held invisible until `begin`                               |
+| `rise(begin, distance)`                      | a few pixels of upward translate, paired with a fade                       |
+| `grow(attribute, begin, duration, to)`       | numeric attribute from 0 to its final value (bar fills, rules, clip wipes) |
+| `typeIn(begin, duration, width, characters)` | stepped clip width, the typing effect                                      |
+| `blink()`                                    | discrete on/off loop for the cursor                                        |
+| `pulse(min, period)`                         | the status dot                                                             |
+| `shimmer(begin, min, period)`                | the very slow portrait brightness drift                                    |
+| `sweep(begin, duration, from, to)`           | a translate used by the scan line                                          |
+
+All timings come from `animation` in `profile.config.ts`; `src/renderer/timeline.ts` turns those into
+absolute per-section begin times. Setting `animation.enabled` to `false` makes every helper return
+`null`, so the generator emits a completely static document.
+
+### How an element hides before its turn
+
+A naive reveal sets `opacity="0"` on the element and animates it to 1, which leaves the whole profile
+invisible in any renderer that ignores SMIL. Instead each reveal keeps its **final** value as the
+base attribute and uses a single animation that holds the start value until the reveal moment:
+
+```xml
+<g>
+  <text …>name</text>
+  <animate attributeName="opacity" values="0;0;1" keyTimes="0;0.83;1" dur="1.4s" fill="freeze"/>
+</g>
+```
+
+The element is invisible from `0s`, fades in at its scheduled time and freezes visible. A renderer
+with no SMIL support (librsvg, resvg, most thumbnailers) reads only the base attributes and draws the
+finished dashboard. Clip rectangles follow the same rule: their base `width` is the full width, and
+the animation drives it from 0.
+
+### Entrance timeline
+
+| Time  | What happens                                                             |
+| ----- | ------------------------------------------------------------------------ |
+| 0.00s | terminal frame and border                                                |
+| 0.15s | window chrome, title, context and the status dot                         |
+| 0.35s | `$ whoami --system` types in, the header rule draws to the right         |
+| 0.90s | ASCII portrait draws row by row behind a descending scan gradient        |
+| 1.15s | identity panel frame, `field`/`value` header, then table rows stagger in |
+| 1.67s | `$ gh stats --telemetry` types in                                        |
+| 1.95s | telemetry rows stagger in                                                |
+| 2.35s | language bars fill left to right, staggered, percentages follow          |
+| 2.67s | `$ stack --list` types in                                                |
+| 2.95s | stack rows wipe in left to right                                         |
+| 3.17s | `$ gh contributions --range 12m` types in                                |
+| 3.45s | contribution graph reveals as a 1.25s horizontal wave                    |
+| 4.32s | `$ git log --recent` types in                                            |
+| 4.60s | activity rows and featured repositories fade in                          |
+| 5.00s | footer command types, then the block cursor appears                      |
+| ~5.2s | entrance complete, everything frozen on its final value                  |
+
+### What keeps moving
+
+Exactly five loops run forever, all cheap:
+
+| Loop                          | Period | Purpose                                                 |
+| ----------------------------- | ------ | ------------------------------------------------------- |
+| footer block cursor           | 1.15s  | discrete on/off, roughly 575ms visible and 575ms hidden |
+| header status dot             | 2.4s   | opacity pulse next to `online`                          |
+| most recent contribution cell | 3.2s   | a thin accent outline that breathes                     |
+| portrait brightness           | 9s     | drifts to 93% opacity and back                          |
+| portrait scan line            | 15.3s  | a 5%-opacity line crossing the portrait                 |
+
+Nothing else repeats. The portrait draw, the bar fills and the graph wave are one-shot and frozen.
+
+### Specific techniques
+
+- **Typing.** The command text is fully present in the document. A `<clipPath>` rectangle over it has
+  its `width` animated with `calcMode="discrete"`, so the text appears in chunks rather than sliding
+  out smoothly. One clip path and one `<animate>` per command, not one element per character.
+- **Portrait draw.** One `<animate>` per ASCII row (about 27 nodes) staggered across
+  `avatarRevealDuration`, plus a single gradient rectangle translated down the portrait as the
+  leading edge. No per-character animation.
+- **Contribution graph.** All cells are drawn once inside a group clipped by a rectangle whose width
+  animates from 0 to the grid width, which produces the left-to-right wave with two animation nodes
+  total instead of several hundred. A thin accent bar rides the clip edge.
+- **Progress bars.** Each filled rectangle keeps its true width as its base attribute and animates
+  `width` from 0, staggered by `barFillStagger`. The percentage text fades in partway through the
+  fill. The numbers themselves are never animated, since counting up would require scripting.
+- **Tables.** `TerminalTable` reveals rows either by fading (identity) or by a per-row clip wipe
+  (stack), selected with its `reveal` prop.
+
+Total cost: about 124 animation nodes and roughly 18KB on top of the static document.
 
 ## ASCII avatar pipeline
 
@@ -260,7 +363,15 @@ default; leave it empty to hide the row.
 - `width`, `height` and `viewBox` present and mutually consistent,
 - no `NaN`, `undefined`, `null`, `<script`, `javascript:` or inline event handlers,
 - every text run inside the canvas, using its declared `textLength`,
-- no token-shaped string and no occurrence of the token actually in use.
+- no token-shaped string and no occurrence of the token actually in use,
+- no `<script>`, no `@keyframes` and no inline event handler,
+- every non-looping animation carries `fill="freeze"`, and every clip rectangle keeps a non-zero base
+  width so the static fallback is complete.
+
+Animation frames are checked in a real browser with `pnpm frames`, which inlines the SVG, calls
+`pauseAnimations()` and `setCurrentTime(t)`, screenshots headless Chrome at each requested second and
+assembles a contact sheet. That harness is a development tool; nothing it does is part of the
+generated output.
 
 The renderer escapes by construction: JSX produces a node tree, and the serializer escapes every
 attribute and text node. There is no raw-markup escape hatch, so a repository description, profile

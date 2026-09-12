@@ -2,6 +2,7 @@ import { h, type SvgElement } from '../../svg/jsx.ts';
 import type { Palette } from '../../config/types.ts';
 import type { FeaturedRepository } from '../../data/types.ts';
 import type { Metrics } from '../layout.ts';
+import type { Motion } from '../animation.ts';
 import { formatCount } from '../../utils/numbers.ts';
 import { pluralize, truncate } from '../../utils/text.ts';
 import { type Token, TokenLine } from './primitives.tsx';
@@ -13,6 +14,9 @@ export interface FeaturedRepositoriesProps {
   repositories: FeaturedRepository[];
   metrics: Metrics;
   palette: Palette;
+  motion: Motion;
+  begin: number;
+  stagger: number;
 }
 
 export function featuredHeight(repositories: FeaturedRepository[], metrics: Metrics): number {
@@ -20,17 +24,20 @@ export function featuredHeight(repositories: FeaturedRepository[], metrics: Metr
 }
 
 export function FeaturedRepositories(props: FeaturedRepositoriesProps): SvgElement {
-  const { metrics, palette } = props;
+  const { metrics, palette, motion } = props;
   const totalColumns = Math.floor(props.width / metrics.cellWidth);
 
   if (props.repositories.length === 0) {
     return (
-      <TokenLine
-        x={props.x}
-        y={props.y + metrics.lineHeight - 5}
-        cellWidth={metrics.cellWidth}
-        tokens={[{ text: 'no repositories configured', fill: palette.textDim }]}
-      />
+      <g>
+        <TokenLine
+          x={props.x}
+          y={props.y + metrics.lineHeight - 5}
+          cellWidth={metrics.cellWidth}
+          tokens={[{ text: 'no repositories configured', fill: palette.textDim }]}
+        />
+        {motion.fadeIn(props.begin)}
+      </g>
     );
   }
 
@@ -49,22 +56,26 @@ export function FeaturedRepositories(props: FeaturedRepositoriesProps): SvgEleme
     headline.push({ text: metaText, fill: palette.textDim });
 
     const description = repository.description ?? 'no description provided';
+    const begin = props.begin + index * props.stagger * 2;
     return [
-      <TokenLine
-        x={props.x}
-        y={props.y + (index * 2 + 1) * metrics.lineHeight - 5}
-        cellWidth={metrics.cellWidth}
-        tokens={headline}
-      />,
-      <TokenLine
-        x={props.x}
-        y={props.y + (index * 2 + 2) * metrics.lineHeight - 7}
-        cellWidth={metrics.cellWidth}
-        tokens={[
-          { text: '  ', fill: palette.border },
-          { text: truncate(description, totalColumns - 3), fill: palette.textMuted },
-        ]}
-      />,
+      <g>
+        <TokenLine
+          x={props.x}
+          y={props.y + (index * 2 + 1) * metrics.lineHeight - 5}
+          cellWidth={metrics.cellWidth}
+          tokens={headline}
+        />
+        <TokenLine
+          x={props.x}
+          y={props.y + (index * 2 + 2) * metrics.lineHeight - 7}
+          cellWidth={metrics.cellWidth}
+          tokens={[
+            { text: '  ', fill: palette.border },
+            { text: truncate(description, totalColumns - 3), fill: palette.textMuted },
+          ]}
+        />
+        {motion.fadeIn(begin, 0.3)}
+      </g>,
     ];
   });
 

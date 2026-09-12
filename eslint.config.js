@@ -4,7 +4,7 @@ import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
-    ignores: ['node_modules/**', 'generated/**', 'dist/**', 'archive/**'],
+    ignores: ['node_modules/**', 'generated/**', 'dist/**', 'archive/**', 'scripts/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,

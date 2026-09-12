@@ -99,8 +99,8 @@ describe('section toggles', () => {
       },
       'dark',
     );
-    expect(dark).toContain('stack --list');
-    expect(withoutStack).not.toContain('stack --list');
+    expect(dark).toContain('--list');
+    expect(withoutStack).not.toContain('--list');
   });
 
   it('still renders a valid document with every optional section off', () => {

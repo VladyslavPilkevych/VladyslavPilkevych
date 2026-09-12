@@ -1,8 +1,9 @@
 import { h, type SvgElement } from '../../svg/jsx.ts';
 import type { Palette, StackConfig } from '../../config/types.ts';
 import type { Metrics } from '../layout.ts';
-import { padEnd } from '../../utils/text.ts';
-import { type Token, TokenLine } from './primitives.tsx';
+import type { Motion } from '../animation.ts';
+import { type Token } from './primitives.tsx';
+import { TerminalTable, terminalTableHeight, type TableRow } from './TerminalTable.tsx';
 
 export interface TechStackProps {
   x: number;
@@ -11,9 +12,12 @@ export interface TechStackProps {
   stack: StackConfig;
   metrics: Metrics;
   palette: Palette;
+  motion: Motion;
+  begin: number;
+  stagger: number;
 }
 
-const LABEL_COLUMNS = 12;
+const CATEGORY_COLUMNS = 14;
 
 export function stackRows(stack: StackConfig): { label: string; items: string[] }[] {
   const groups = stack.groups.filter((group) => group.items.length > 0);
@@ -25,25 +29,45 @@ export function stackRows(stack: StackConfig): { label: string; items: string[] 
 }
 
 export function techStackHeight(stack: StackConfig, metrics: Metrics): number {
-  return stackRows(stack).length * metrics.lineHeight;
+  return terminalTableHeight(stackRows(stack).length, true, metrics);
 }
 
 export function TechStack(props: TechStackProps): SvgElement {
-  const { metrics, palette } = props;
-  const rows = stackRows(props.stack).map((row, index) => {
-    const tokens: Token[] = [{ text: padEnd(row.label, LABEL_COLUMNS), fill: palette.accent }];
-    row.items.forEach((item, itemIndex) => {
-      if (itemIndex > 0) tokens.push({ text: '  ·  ', fill: palette.border });
-      tokens.push({ text: item, fill: palette.text });
+  const { metrics, palette, motion } = props;
+  const rows: TableRow[] = stackRows(props.stack).map((row) => {
+    const modules: Token[] = [];
+    row.items.forEach((item, index) => {
+      if (index > 0) modules.push({ text: ' · ', fill: palette.border });
+      modules.push({ text: item, fill: palette.text });
     });
-    return (
-      <TokenLine
-        x={props.x}
-        y={props.y + (index + 1) * metrics.lineHeight - 5}
-        cellWidth={metrics.cellWidth}
-        tokens={tokens}
-      />
-    );
+    return {
+      key: row.label,
+      cells: [[{ text: row.label, fill: palette.accent }], modules],
+    };
   });
-  return <g>{rows}</g>;
+
+  return (
+    <TerminalTable
+      x={props.x}
+      y={props.y}
+      width={props.width}
+      columns={[
+        { label: 'category', columns: CATEGORY_COLUMNS },
+        {
+          label: 'modules',
+          columns: Math.max(8, Math.floor(props.width / metrics.cellWidth) - CATEGORY_COLUMNS),
+        },
+      ]}
+      rows={rows}
+      showHeader={true}
+      separator={true}
+      metrics={metrics}
+      palette={palette}
+      motion={motion}
+      begin={props.begin}
+      stagger={props.stagger}
+      reveal="wipe"
+      idPrefix="tp-stack"
+    />
+  );
 }

@@ -120,6 +120,34 @@ export interface ThemeConfig {
   spacing: SpacingConfig;
 }
 
+export interface AnimationConfig {
+  enabled: boolean;
+  frameDelay: number;
+  chromeDelay: number;
+  heroDelay: number;
+  typingDuration: number;
+  avatarRevealDelay: number;
+  avatarRevealDuration: number;
+  identityRevealDelay: number;
+  identityRowStagger: number;
+  statsRevealDelay: number;
+  statsRowStagger: number;
+  barFillDelay: number;
+  barFillDuration: number;
+  barFillStagger: number;
+  stackRevealDelay: number;
+  stackRowStagger: number;
+  graphRevealDelay: number;
+  graphRevealDuration: number;
+  activityRevealDelay: number;
+  activityRowStagger: number;
+  footerDelay: number;
+  sectionFadeDuration: number;
+  cursorBlinkPeriod: number;
+  statusPulsePeriod: number;
+  idleLoopDuration: number;
+}
+
 export interface ProfileConfig {
   githubUsername: string;
   personal: PersonalConfig;
@@ -128,6 +156,7 @@ export interface ProfileConfig {
   github: GitHubConfig;
   sections: SectionsConfig;
   stack: StackConfig;
+  animation: AnimationConfig;
   theme: ThemeConfig;
 }
 

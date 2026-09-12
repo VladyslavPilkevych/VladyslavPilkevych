@@ -1,4 +1,4 @@
-import { Fragment, h, type SvgElement } from '../../svg/jsx.ts';
+import { h, type SvgChild, type SvgElement } from '../../svg/jsx.ts';
 import { visualLength } from '../../utils/text.ts';
 
 export interface TextProps {
@@ -10,7 +10,6 @@ export interface TextProps {
   fontSize?: number;
   weight?: number;
   opacity?: number;
-  letterSpacing?: number;
 }
 
 export function Text(props: TextProps): SvgElement {
@@ -79,6 +78,7 @@ export interface RuleProps {
   color: string;
   opacity?: number;
   thickness?: number;
+  children?: SvgChild;
 }
 
 export function Rule(props: RuleProps): SvgElement {
@@ -90,7 +90,9 @@ export function Rule(props: RuleProps): SvgElement {
       height={props.thickness ?? 1}
       fill={props.color}
       opacity={props.opacity}
-    />
+    >
+      {props.children}
+    </rect>
   );
 }
 
@@ -103,6 +105,7 @@ export interface PanelProps {
   stroke?: string;
   radius?: number;
   opacity?: number;
+  children?: SvgChild;
 }
 
 export function Panel(props: PanelProps): SvgElement {
@@ -118,10 +121,8 @@ export function Panel(props: PanelProps): SvgElement {
       stroke={props.stroke}
       stroke-width={props.stroke ? 1 : undefined}
       opacity={props.opacity}
-    />
+    >
+      {props.children}
+    </rect>
   );
-}
-
-export function Group(props: { children?: unknown }): SvgElement {
-  return <Fragment>{props.children as never}</Fragment>;
 }

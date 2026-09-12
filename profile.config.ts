@@ -27,7 +27,7 @@ const profileConfig: ProfileConfig = {
 
   avatar: {
     enabled: true,
-    width: 62,
+    width: 56,
     characterRamp: ' .:-=+*#%@',
     cellAspectRatio: 2.05,
     contrast: 1.45,
@@ -73,6 +73,34 @@ const profileConfig: ProfileConfig = {
       { label: 'backend', items: ['node', 'spring', 'sqlite'] },
       { label: 'tooling', items: ['git', 'docker', 'npm', 'pnpm', 'figma'] },
     ],
+  },
+
+  animation: {
+    enabled: true,
+    frameDelay: 0,
+    chromeDelay: 0.15,
+    heroDelay: 0.35,
+    typingDuration: 0.5,
+    avatarRevealDelay: 0.9,
+    avatarRevealDuration: 0.75,
+    identityRevealDelay: 1.15,
+    identityRowStagger: 0.055,
+    statsRevealDelay: 1.95,
+    statsRowStagger: 0.05,
+    barFillDelay: 2.35,
+    barFillDuration: 0.55,
+    barFillStagger: 0.06,
+    stackRevealDelay: 2.95,
+    stackRowStagger: 0.09,
+    graphRevealDelay: 3.45,
+    graphRevealDuration: 1.25,
+    activityRevealDelay: 4.6,
+    activityRowStagger: 0.05,
+    footerDelay: 5,
+    sectionFadeDuration: 0.34,
+    cursorBlinkPeriod: 1.15,
+    statusPulsePeriod: 2.4,
+    idleLoopDuration: 9,
   },
 
   theme: {

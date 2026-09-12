@@ -3,3 +3,4 @@ dist/
 archive/
 pnpm-lock.yaml
 node_modules/
+scripts/

@@ -2,6 +2,7 @@ import { h, type SvgElement } from '../../svg/jsx.ts';
 import type { Palette } from '../../config/types.ts';
 import type { LanguageShare } from '../../data/types.ts';
 import type { Metrics } from '../layout.ts';
+import type { Motion } from '../animation.ts';
 import { formatPercent } from '../../utils/numbers.ts';
 import { truncate, visualLength } from '../../utils/text.ts';
 import { Text } from './primitives.tsx';
@@ -13,6 +14,10 @@ export interface LanguageStatsProps {
   entries: LanguageShare[];
   metrics: Metrics;
   palette: Palette;
+  motion: Motion;
+  begin: number;
+  duration: number;
+  stagger: number;
 }
 
 const LABEL_COLUMNS = 13;
@@ -38,7 +43,7 @@ export function languageBarColor(
 }
 
 export function LanguageStats(props: LanguageStatsProps): SvgElement {
-  const { metrics, palette } = props;
+  const { metrics, palette, motion } = props;
   const labelWidth = LABEL_COLUMNS * metrics.cellWidth;
   const percentWidth = PERCENT_COLUMNS * metrics.cellWidth;
   const barX = props.x + labelWidth;
@@ -51,6 +56,7 @@ export function LanguageStats(props: LanguageStatsProps): SvgElement {
     const filled = barWidth * ratio;
     const color = languageBarColor(index, palette);
     const percentText = formatPercent(entry.percent, 1);
+    const begin = props.begin + index * props.stagger;
     const slits: SvgElement[] = [];
     for (let segment = 1; segment < SEGMENTS; segment += 1) {
       slits.push(
@@ -65,21 +71,27 @@ export function LanguageStats(props: LanguageStatsProps): SvgElement {
     }
     return (
       <g>
-        <Text
-          x={props.x}
-          y={baseline}
-          value={truncate(entry.name, LABEL_COLUMNS - 1)}
-          fill={palette.text}
-          cellWidth={metrics.cellWidth}
-        />
-        <rect
-          x={barX}
-          y={barY}
-          width={barWidth}
-          height={BAR_HEIGHT}
-          rx={1.5}
-          fill={palette.barTrack}
-        />
+        <g>
+          <Text
+            x={props.x}
+            y={baseline}
+            value={truncate(entry.name, LABEL_COLUMNS - 1)}
+            fill={palette.text}
+            cellWidth={metrics.cellWidth}
+          />
+          {motion.fadeIn(begin, 0.26)}
+        </g>
+        <g>
+          <rect
+            x={barX}
+            y={barY}
+            width={barWidth}
+            height={BAR_HEIGHT}
+            rx={1.5}
+            fill={palette.barTrack}
+          />
+          {motion.fadeIn(Math.max(0, begin - 0.08), 0.22)}
+        </g>
         {filled > 0 ? (
           <rect
             x={barX}
@@ -89,16 +101,21 @@ export function LanguageStats(props: LanguageStatsProps): SvgElement {
             rx={1.5}
             fill={color.fill}
             opacity={color.opacity}
-          />
+          >
+            {motion.grow('width', begin, props.duration, filled)}
+          </rect>
         ) : null}
         {slits}
-        <Text
-          x={props.x + props.width - visualLength(percentText) * metrics.cellWidth}
-          y={baseline}
-          value={percentText}
-          fill={palette.textMuted}
-          cellWidth={metrics.cellWidth}
-        />
+        <g>
+          <Text
+            x={props.x + props.width - visualLength(percentText) * metrics.cellWidth}
+            y={baseline}
+            value={percentText}
+            fill={palette.textMuted}
+            cellWidth={metrics.cellWidth}
+          />
+          {motion.fadeIn(begin + props.duration * 0.55, 0.3)}
+        </g>
       </g>
     );
   });
