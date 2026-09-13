@@ -159,7 +159,9 @@ Nothing else repeats. The portrait draw, the bar fills and the graph wave are on
   fill. The numbers themselves are never animated, since counting up would require scripting.
 - **Technology network.** `src/renderer/techNetwork.ts` turns the configured stack groups into
   columns of nodes and derives edges between adjacent columns (or uses `stack.connections` when
-  given). Each edge is one `<path>`; a single `<circle>` per edge rides it with `<animateMotion>`
+  given). `distributeColumns` measures each column's widest label and spreads the columns so the
+  last one ends flush with the right edge, splitting the leftover space into equal gutters; the
+  curves therefore live in the gutters and the section spans the full content width. Each edge is one `<path>`; a single `<circle>` per edge rides it with `<animateMotion>`
   using the same `d` string, gated by `keyPoints`/`keyTimes` so the dot travels for 45% of the cycle
   and is invisible for the rest. Node halos breathe with one `<animate>` each at a deterministic
   phase from `phaseOffset`.
@@ -377,9 +379,12 @@ Durations are written out in full (`5 years 8 days`, `1 year 1 month 1 day`) by 
 `src/utils/dates.ts`, which pluralises each unit independently and omits units that are zero.
 
 The `whoami --system` block is not a table. `TerminalKeyValue` renders it as command output: a
-lowercase key, a dotted leader padded to one shared field width, then the value. Keys use the muted
-tone, leaders the border tone and values the primary tone, so the three read as a hierarchy rather
-than as columns of a grid.
+lowercase key on the left, then a dotted leader that stretches to fill whatever space is left, then
+the value flush against the right edge of the panel. `layoutLeaderRow` sizes the leader per row as
+`totalColumns - key - value - 2`, so every row ends on exactly the same column no matter how long
+its value is, and an over-long value is truncated rather than allowed to push past the wall. Keys
+use the muted tone, leaders the border tone and values the primary tone, so the three read as a
+hierarchy rather than as columns of a grid.
 
 ## Output validation
 

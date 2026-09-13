@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import profileConfig from '../profile.config.ts';
-import { buildTechNetwork, nodeId, phaseOffset } from '../src/renderer/techNetwork.ts';
-import { buildLeader, leaderColumns } from '../src/renderer/components/TerminalKeyValue.tsx';
+import {
+  buildTechNetwork,
+  distributeColumns,
+  nodeId,
+  phaseOffset,
+} from '../src/renderer/techNetwork.ts';
+import { layoutLeaderRow } from '../src/renderer/components/TerminalKeyValue.tsx';
 import { pulseProfile } from '../src/renderer/components/ContributionGraph.tsx';
 import { normalizeContributionYears } from '../src/github/profile.ts';
 import { buildAllTimeQuery } from '../src/github/queries.ts';
@@ -26,6 +31,7 @@ describe('buildTechNetwork', () => {
       'backend',
       'devops',
     ]);
+    expect(network.columns.map((column) => column.longestLabel)).toEqual([5, 6, 6]);
     expect(network.nodes).toHaveLength(6);
     expect(network.rows).toBe(3);
     expect(network.longestLabel).toBe(6);
@@ -83,7 +89,7 @@ describe('buildTechNetwork', () => {
 
   it('falls back to the flat technology list when no groups are configured', () => {
     const network = buildTechNetwork({ ...baseStack, groups: [], technologies: ['a', 'b'] });
-    expect(network.columns).toEqual([{ label: 'stack', size: 2 }]);
+    expect(network.columns).toEqual([{ label: 'stack', size: 2, longestLabel: 1 }]);
     expect(network.edges).toEqual([]);
   });
 
@@ -118,26 +124,76 @@ describe('phaseOffset', () => {
   });
 });
 
-describe('terminal key/value leaders', () => {
-  const rows = [
-    { key: 'name', value: 'Vladyslav Pilkevych' },
-    { key: 'languages', value: 'Ukrainian / English' },
+describe('distributeColumns', () => {
+  const columns = [
+    { label: 'a', size: 1, longestLabel: 10 },
+    { label: 'b', size: 1, longestLabel: 6 },
+    { label: 'c', size: 1, longestLabel: 6 },
   ];
 
-  it('uses one leader field wide enough for the longest key', () => {
-    const field = leaderColumns(rows);
-    expect(field).toBeGreaterThanOrEqual('languages'.length + 2);
+  it('spans the full width so the last column ends at the right edge', () => {
+    const geometry = distributeColumns(columns, 0, 900, 20, 8, 10);
+    const last = geometry[geometry.length - 1];
+    expect((last?.x ?? 0) + (last?.contentWidth ?? 0)).toBeCloseTo(900, 6);
   });
 
-  it('aligns every value on the same column', () => {
-    const field = leaderColumns(rows);
-    for (const row of rows) {
-      expect(row.key.length + 1 + buildLeader(row.key, field).length + 1).toBe(field);
+  it('uses one identical gutter between every pair of columns', () => {
+    const geometry = distributeColumns(columns, 0, 900, 20, 8, 10);
+    const gaps = geometry
+      .slice(1)
+      .map(
+        (column, index) =>
+          column.x - ((geometry[index]?.x ?? 0) + (geometry[index]?.contentWidth ?? 0)),
+      );
+    expect(gaps[0]).toBeCloseTo(gaps[1] ?? 0, 6);
+  });
+
+  it('never overlaps columns even when the width is too small', () => {
+    const geometry = distributeColumns(columns, 0, 40, 20, 8, 12);
+    for (let index = 1; index < geometry.length; index += 1) {
+      const previous = geometry[index - 1];
+      expect(geometry[index]?.x).toBeGreaterThanOrEqual(
+        (previous?.x ?? 0) + (previous?.contentWidth ?? 0) + 12,
+      );
     }
   });
 
-  it('never produces a negative leader for an over-long key', () => {
-    expect(buildLeader('an-extremely-long-key-name', 10)).toBe('');
+  it('handles the degenerate cases', () => {
+    expect(distributeColumns([], 0, 900, 20, 8, 10)).toEqual([]);
+    expect(distributeColumns([columns[0]!], 5, 900, 20, 8, 10)).toEqual([
+      { x: 5, contentWidth: 100 },
+    ]);
+  });
+});
+
+describe('terminal key/value leaders', () => {
+  it('pushes the value against the right edge', () => {
+    const { leader, value } = layoutLeaderRow('name', 'Vladyslav Pilkevych', 60);
+    expect('name'.length + 1 + leader.length + 1 + value.length).toBe(60);
+  });
+
+  it('keeps every row ending on the same column regardless of value length', () => {
+    const rows = [
+      { key: 'name', value: 'Vladyslav Pilkevych' },
+      { key: 'role', value: 'Software Engineer' },
+      { key: 'languages', value: 'Ukrainian / English / Slovak' },
+    ];
+    const widths = rows.map((row) => {
+      const layout = layoutLeaderRow(row.key, row.value, 72);
+      return row.key.length + 1 + layout.leader.length + 1 + layout.value.length;
+    });
+    expect(new Set(widths)).toEqual(new Set([72]));
+  });
+
+  it('always leaves a visible leader', () => {
+    const { leader } = layoutLeaderRow('key', 'a'.repeat(200), 40);
+    expect(leader.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('truncates a value that cannot fit instead of overflowing', () => {
+    const { value } = layoutLeaderRow('key', 'a'.repeat(200), 40);
+    expect(value.length).toBeLessThanOrEqual(40 - 'key'.length - 2 - 4);
+    expect(value.endsWith('…')).toBe(true);
   });
 });
 

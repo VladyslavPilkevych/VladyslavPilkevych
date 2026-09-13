@@ -16,6 +16,7 @@ export interface NetworkEdge {
 export interface NetworkColumn {
   label: string;
   size: number;
+  longestLabel: number;
 }
 
 export interface TechNetwork {
@@ -81,6 +82,7 @@ export function buildTechNetwork(stack: StackConfig): TechNetwork {
   const columns: NetworkColumn[] = source.map((group) => ({
     label: group.label,
     size: group.items.length,
+    longestLabel: group.items.reduce((widest, item) => Math.max(widest, visualLength(item)), 0),
   }));
 
   const nodes: NetworkNode[] = [];
@@ -112,4 +114,31 @@ export function buildTechNetwork(stack: StackConfig): TechNetwork {
 export function phaseOffset(index: number, period: number, steps = 7): number {
   const scrambled = (index * 5 + Math.floor(index / steps) * 3) % steps;
   return (scrambled / steps) * period;
+}
+
+export interface ColumnGeometry {
+  x: number;
+  contentWidth: number;
+}
+
+export function distributeColumns(
+  columns: NetworkColumn[],
+  x: number,
+  width: number,
+  nodeArea: number,
+  cellWidth: number,
+  minGutter: number,
+): ColumnGeometry[] {
+  if (columns.length === 0) return [];
+  const contents = columns.map((column) => nodeArea + column.longestLabel * cellWidth);
+  if (columns.length === 1) return [{ x, contentWidth: contents[0] ?? 0 }];
+  const used = contents.reduce((sum, value) => sum + value, 0);
+  const gutter = Math.max(minGutter, (width - used) / (columns.length - 1));
+  const geometry: ColumnGeometry[] = [];
+  let cursor = x;
+  contents.forEach((contentWidth) => {
+    geometry.push({ x: cursor, contentWidth });
+    cursor += contentWidth + gutter;
+  });
+  return geometry;
 }

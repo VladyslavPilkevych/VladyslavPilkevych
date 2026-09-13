@@ -11,7 +11,7 @@ const profileConfig: ProfileConfig = {
     website: 'vladyslavpilkevych.com',
     location: 'Bratislava, Slovakia',
     company: null,
-    languages: ['Ukrainian', 'English', 'Slovak', 'Russian'],
+    languages: ['Ukrainian', 'English', 'Slovak'],
     codingSince: '2021-09-05',
   },
 

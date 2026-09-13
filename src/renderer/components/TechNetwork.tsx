@@ -2,7 +2,12 @@ import { h, type SvgChild, type SvgElement } from '../../svg/jsx.ts';
 import type { Palette, StackConfig } from '../../config/types.ts';
 import type { Metrics } from '../layout.ts';
 import { seconds, type Motion } from '../animation.ts';
-import { buildTechNetwork, phaseOffset, type TechNetwork as Network } from '../techNetwork.ts';
+import {
+  buildTechNetwork,
+  distributeColumns,
+  phaseOffset,
+  type TechNetwork as Network,
+} from '../techNetwork.ts';
 import { visualLength } from '../../utils/text.ts';
 import { Text } from './primitives.tsx';
 
@@ -18,14 +23,16 @@ export interface TechNetworkProps {
   stagger: number;
 }
 
-const HEADER_HEIGHT = 26;
-const ROW_PITCH = 26;
-const NODE_RADIUS = 3.6;
-const HALO_RADIUS = 8.5;
-const LABEL_GAP = 12;
-const EDGE_GAP = 9;
-const PULSE_RADIUS = 2.1;
+const HEADER_HEIGHT = 32;
+const ROW_PITCH = 31;
+const NODE_RADIUS = 4.2;
+const HALO_RADIUS = 10.5;
+const LABEL_GAP = 14;
+const EDGE_GAP = 11;
+const PULSE_RADIUS = 2.4;
 const TRAVEL_SHARE = 0.45;
+const MIN_GUTTER = 70;
+const NODE_AREA = NODE_RADIUS * 2 + LABEL_GAP + EDGE_GAP;
 
 interface Placement {
   centerX: number;
@@ -47,6 +54,17 @@ function nodeCellWidth(metrics: Metrics): number {
   return metrics.cellWidth * ((metrics.fontSize - 1) / metrics.fontSize);
 }
 
+function columnGeometry(network: Network, x: number, width: number, metrics: Metrics) {
+  return distributeColumns(
+    network.columns,
+    x,
+    width,
+    NODE_AREA,
+    nodeCellWidth(metrics),
+    MIN_GUTTER,
+  );
+}
+
 function placements(
   network: Network,
   x: number,
@@ -54,11 +72,11 @@ function placements(
   width: number,
   metrics: Metrics,
 ): Map<string, Placement> {
-  const pitch = width / Math.max(1, network.columns.length);
+  const geometry = columnGeometry(network, x, width, metrics);
   const cell = nodeCellWidth(metrics);
   const map = new Map<string, Placement>();
   for (const node of network.nodes) {
-    const columnX = x + node.column * pitch + 2;
+    const columnX = geometry[node.column]?.x ?? x;
     const centerX = columnX + NODE_RADIUS + 2;
     const centerY = y + HEADER_HEIGHT + node.row * ROW_PITCH + ROW_PITCH / 2;
     const labelX = centerX + LABEL_GAP;
@@ -92,13 +110,13 @@ export function TechNetwork(props: TechNetworkProps): SvgElement {
   if (network.rows === 0) return <g />;
 
   const spots = placements(network, props.x, props.y, props.width, metrics);
-  const pitch = props.width / Math.max(1, network.columns.length);
+  const geometry = columnGeometry(network, props.x, props.width, metrics);
   const period = motion.config.networkPulsePeriod;
 
   const headers = network.columns.map((column, index) => (
     <g>
       <Text
-        x={props.x + index * pitch + 2}
+        x={geometry[index]?.x ?? props.x}
         y={props.y + metrics.fontSize - 2}
         value={column.label.toUpperCase()}
         fill={palette.textDim}
