@@ -3,6 +3,7 @@ import type { Palette } from '../../config/types.ts';
 import type { ContributionCalendar, ContributionLevel } from '../../data/types.ts';
 import type { Metrics } from '../layout.ts';
 import { seconds, type Motion } from '../animation.ts';
+import { roundTo } from '../../utils/numbers.ts';
 import { monthAbbreviation, parseCalendarDate } from '../../utils/dates.ts';
 import { visualLength } from '../../utils/text.ts';
 import { Text } from './primitives.tsx';
@@ -56,6 +57,23 @@ export function contributionGraphHeight(
 ): number {
   const geometry = graphGeometry(calendar.weeks.length, width, metrics);
   return MONTH_LABEL_HEIGHT + geometry.gridHeight + LEGEND_HEIGHT;
+}
+
+export function pulseProfile(
+  level: ContributionLevel,
+  index: number,
+  config: { basePeriod: number; jitter: number; depth: [number, number, number, number] },
+): { period: number; minimum: number; phase: number } | null {
+  if (level === 0) return null;
+  const depth = config.depth[level - 1] ?? 0.9;
+  const scrambled = ((index * 2654435761) >>> 0) % 1000;
+  const period = config.basePeriod + (scrambled / 1000) * config.jitter - level * 0.18;
+  const safePeriod = Math.max(1.6, period);
+  return {
+    period: roundTo(safePeriod, 2),
+    minimum: depth,
+    phase: roundTo((((index * 7919) >>> 0) % 1000) / 1000, 2),
+  };
 }
 
 export function levelColor(level: ContributionLevel, palette: Palette): string {
@@ -115,14 +133,22 @@ export function ContributionGraph(props: ContributionGraphProps): SvgElement {
     ) : null,
   );
 
+  const pulseConfig = {
+    basePeriod: motion.config.contributionPulseBasePeriod,
+    jitter: motion.config.contributionPulseJitter,
+    depth: motion.config.contributionPulseDepth,
+  };
   const cells: SvgElement[] = [];
   const positions: { x: number; y: number }[] = [];
+  let cellIndex = 0;
   calendar.weeks.forEach((week, weekIndex) => {
     week.forEach((day, dayIndex) => {
       if (!day) return;
       const cellX = gridLeft + weekIndex * geometry.pitch;
       const cellY = gridTop + dayIndex * step;
       positions.push({ x: cellX, y: cellY });
+      const pulse = motion.enabled ? pulseProfile(day.level, cellIndex, pulseConfig) : null;
+      cellIndex += 1;
       cells.push(
         <rect
           x={cellX}
@@ -132,7 +158,17 @@ export function ContributionGraph(props: ContributionGraphProps): SvgElement {
           rx={2.5}
           ry={2.5}
           fill={levelColor(day.level, palette)}
-        />,
+        >
+          {pulse ? (
+            <animate
+              attributeName="opacity"
+              values={`1;${String(pulse.minimum)};1`}
+              dur={seconds(pulse.period)}
+              begin={seconds(-pulse.phase * pulse.period)}
+              repeatCount="indefinite"
+            />
+          ) : null}
+        </rect>,
       );
     });
   });

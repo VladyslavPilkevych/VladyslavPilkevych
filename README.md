@@ -18,9 +18,9 @@
 
 </div>
 
-<div align="center">
+<!-- <div align="center">
   <sub>
     Rendered from live GitHub data by the generator in this repository ·
     <a href="docs/PROFILE_GENERATOR.md">how it works</a>
   </sub>
-</div>
+</div> -->

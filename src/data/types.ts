@@ -80,6 +80,8 @@ export interface GitHubStats {
   issuesOpened: number | null;
   contributionsLastYear: number;
   contributionsThisYear: number | null;
+  contributionsAllTime: number | null;
+  contributionYearsCovered: number;
   commitContributionsLastYear: number | null;
   activeDaysLastYear: number;
   privateContributionsIncluded: boolean;

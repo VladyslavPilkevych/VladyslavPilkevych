@@ -1,3 +1,5 @@
+import { pluralize } from './text.ts';
+
 const MS_PER_DAY = 86_400_000;
 
 const MONTH_ABBREVIATIONS = [
@@ -116,15 +118,19 @@ export function daysInMonth(year: number, month: number): number {
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
 }
 
+export function formatDuration(parts: DurationParts): string {
+  const segments: string[] = [];
+  if (parts.years > 0) segments.push(`${String(parts.years)} ${pluralize(parts.years, 'year')}`);
+  if (parts.months > 0)
+    segments.push(`${String(parts.months)} ${pluralize(parts.months, 'month')}`);
+  if (parts.days > 0 || segments.length === 0) {
+    segments.push(`${String(parts.days)} ${pluralize(parts.days, 'day')}`);
+  }
+  return segments.join(' ');
+}
+
 export function formatUptime(fromIso: string, toIso: string): string {
-  const from = parseCalendarDate(fromIso);
-  const to = parseCalendarDate(toIso);
-  const { years, months, days } = calendarDifference(from, to);
-  const parts: string[] = [];
-  if (years > 0) parts.push(`${years}y`);
-  if (months > 0) parts.push(`${months}m`);
-  if (days > 0 || parts.length === 0) parts.push(`${days}d`);
-  return parts.join(' ');
+  return formatDuration(calendarDifference(parseCalendarDate(fromIso), parseCalendarDate(toIso)));
 }
 
 export function todayInUtc(reference: Date = new Date()): CalendarDate {

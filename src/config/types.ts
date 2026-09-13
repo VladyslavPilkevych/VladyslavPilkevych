@@ -67,11 +67,18 @@ export interface SectionsConfig {
 export interface StackConfig {
   technologies: string[];
   groups: StackGroup[];
+  connections: StackConnection[];
+  fanOut: number;
 }
 
 export interface StackGroup {
   label: string;
   items: string[];
+}
+
+export interface StackConnection {
+  from: string;
+  to: string;
 }
 
 export interface Palette {
@@ -137,6 +144,11 @@ export interface AnimationConfig {
   barFillStagger: number;
   stackRevealDelay: number;
   stackRowStagger: number;
+  networkPulsePeriod: number;
+  networkPulseStagger: number;
+  contributionPulseBasePeriod: number;
+  contributionPulseJitter: number;
+  contributionPulseDepth: [number, number, number, number];
   graphRevealDelay: number;
   graphRevealDuration: number;
   activityRevealDelay: number;

@@ -6,6 +6,7 @@ import {
   daysBetween,
   daysInMonth,
   formatCalendarDate,
+  formatDuration,
   formatHumanDate,
   formatShortDate,
   formatUptime,
@@ -85,22 +86,61 @@ describe('calendarDifference', () => {
   });
 });
 
+describe('formatDuration', () => {
+  it('writes every unit out in full', () => {
+    expect(formatDuration({ years: 4, months: 3, days: 11 })).toBe('4 years 3 months 11 days');
+  });
+
+  it('uses singular wording for a count of one', () => {
+    expect(formatDuration({ years: 1, months: 1, days: 1 })).toBe('1 year 1 month 1 day');
+  });
+
+  it('mixes singular and plural per unit', () => {
+    expect(formatDuration({ years: 2, months: 1, days: 4 })).toBe('2 years 1 month 4 days');
+    expect(formatDuration({ years: 1, months: 2, days: 1 })).toBe('1 year 2 months 1 day');
+  });
+
+  it('omits units that are zero', () => {
+    expect(formatDuration({ years: 5, months: 0, days: 8 })).toBe('5 years 8 days');
+    expect(formatDuration({ years: 0, months: 3, days: 0 })).toBe('3 months');
+  });
+
+  it('falls back to days when everything is zero', () => {
+    expect(formatDuration({ years: 0, months: 0, days: 0 })).toBe('0 days');
+  });
+
+  it('never abbreviates a unit', () => {
+    const rendered = formatDuration({ years: 3, months: 6, days: 2 });
+    expect(rendered).not.toMatch(/\d\s*[ymd]\b/);
+    expect(rendered).toBe('3 years 6 months 2 days');
+  });
+});
+
 describe('formatUptime', () => {
-  it('renders a compact terminal duration', () => {
-    expect(formatUptime('2022-01-01', '2026-09-11')).toBe('4y 8m 10d');
+  it('renders a full-word terminal duration', () => {
+    expect(formatUptime('2022-01-01', '2026-09-11')).toBe('4 years 8 months 10 days');
   });
 
   it('drops empty leading units', () => {
-    expect(formatUptime('2026-07-11', '2026-09-11')).toBe('2m');
-    expect(formatUptime('2026-09-04', '2026-09-11')).toBe('7d');
+    expect(formatUptime('2026-07-11', '2026-09-11')).toBe('2 months');
+    expect(formatUptime('2026-09-04', '2026-09-11')).toBe('7 days');
   });
 
   it('always shows at least one unit', () => {
-    expect(formatUptime('2026-09-11', '2026-09-11')).toBe('0d');
+    expect(formatUptime('2026-09-11', '2026-09-11')).toBe('0 days');
   });
 
   it('keeps years when months and days are zero', () => {
-    expect(formatUptime('2021-09-05', '2026-09-05')).toBe('5y');
+    expect(formatUptime('2021-09-05', '2026-09-05')).toBe('5 years');
+  });
+
+  it('handles a single day and a single year', () => {
+    expect(formatUptime('2026-09-12', '2026-09-13')).toBe('1 day');
+    expect(formatUptime('2025-09-13', '2026-09-13')).toBe('1 year');
+  });
+
+  it('is deterministic', () => {
+    expect(formatUptime('2021-09-05', '2026-09-13')).toBe(formatUptime('2021-09-05', '2026-09-13'));
   });
 });
 

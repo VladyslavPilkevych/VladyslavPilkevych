@@ -30,6 +30,8 @@ export function computeStats(
     issuesOpened: bundle.issuesOpened,
     contributionsLastYear: calendar.total,
     contributionsThisYear: bundle.contributionsThisYear,
+    contributionsAllTime: bundle.contributionsAllTime,
+    contributionYearsCovered: bundle.contributionYears.length,
     commitContributionsLastYear: bundle.commitContributionsLastYear,
     activeDaysLastYear: calendar.activeDays,
     privateContributionsIncluded: bundle.privateContributionsIncluded,

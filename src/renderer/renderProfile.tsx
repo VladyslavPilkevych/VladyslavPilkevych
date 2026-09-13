@@ -12,7 +12,8 @@ import { ASCII_SCAN_GRADIENT_ID, AsciiScanGradient } from './components/AsciiAva
 import { IdentityPanel, identityPanelHeight } from './components/Identity.tsx';
 import { GitHubStats, statsHeight } from './components/GitHubStats.tsx';
 import { LanguageStats, languageStatsHeight } from './components/LanguageStats.tsx';
-import { TechStack, stackRows, techStackHeight } from './components/TechStack.tsx';
+import { TechNetwork, techNetworkHeight } from './components/TechNetwork.tsx';
+import { buildTechNetwork } from './techNetwork.ts';
 import { ContributionGraph, contributionGraphHeight } from './components/ContributionGraph.tsx';
 import { RecentActivity, recentActivityHeight } from './components/RecentActivity.tsx';
 import { FeaturedRepositories, featuredHeight } from './components/FeaturedRepositories.tsx';
@@ -166,15 +167,15 @@ export function renderProfile(data: ProfileData, config: ProfileConfig, theme: T
     });
   }
 
-  if (config.sections.techStack && stackRows(config.stack).length > 0) {
+  if (config.sections.techStack && buildTechNetwork(config.stack).nodes.length > 0) {
     section(context, metrics, palette, motion, config.terminal.promptSymbol, {
-      command: 'stack --list',
+      command: 'stack --network',
       note: 'configured by hand, not inferred',
       headerBegin: timeline.stack.header,
       idPrefix: 'tp-stackcmd',
-      bodyHeight: techStackHeight(config.stack, metrics),
+      bodyHeight: techNetworkHeight(config.stack),
       body: (y) => (
-        <TechStack
+        <TechNetwork
           x={metrics.contentLeft}
           y={y}
           width={metrics.innerWidth}

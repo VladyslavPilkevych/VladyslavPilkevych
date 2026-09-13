@@ -43,6 +43,7 @@ src/data/buildProfileData.ts normalised ProfileData model
 src/renderer/*               TSX components that emit an SVG element tree
 src/renderer/animation.ts    SMIL helpers (the Motion object)
 src/renderer/timeline.ts     absolute entrance timings derived from configuration
+src/renderer/techNetwork.ts  pure node/edge model for the technology network
 src/svg/*                    JSX runtime and serializer that escapes by construction
         |
 src/validate/validateSvg.ts  structural checks on the produced document
@@ -156,8 +157,17 @@ Nothing else repeats. The portrait draw, the bar fills and the graph wave are on
 - **Progress bars.** Each filled rectangle keeps its true width as its base attribute and animates
   `width` from 0, staggered by `barFillStagger`. The percentage text fades in partway through the
   fill. The numbers themselves are never animated, since counting up would require scripting.
-- **Tables.** `TerminalTable` reveals rows either by fading (identity) or by a per-row clip wipe
-  (stack), selected with its `reveal` prop.
+- **Technology network.** `src/renderer/techNetwork.ts` turns the configured stack groups into
+  columns of nodes and derives edges between adjacent columns (or uses `stack.connections` when
+  given). Each edge is one `<path>`; a single `<circle>` per edge rides it with `<animateMotion>`
+  using the same `d` string, gated by `keyPoints`/`keyTimes` so the dot travels for 45% of the cycle
+  and is invisible for the rest. Node halos breathe with one `<animate>` each at a deterministic
+  phase from `phaseOffset`.
+- **Contribution cells.** Every cell with at least one contribution carries one `<animate>` on
+  `opacity`. `pulseProfile` derives the period, depth and phase from the cell index and its level:
+  brighter levels dip further (`contributionPulseDepth`) and cycle slightly faster, and the phase
+  comes from an integer hash so neighbouring cells never breathe in sync. Empty cells get no
+  animation at all, which keeps both the node count and the visual noise down.
 
 Total cost: about 124 animation nodes and roughly 18KB on top of the static document.
 
@@ -241,6 +251,15 @@ Read this before changing any label.
   numbers are public-only. With a `PROFILE_GITHUB_TOKEN` owned by the profile account they match and
   private contributions are included, provided the account has enabled private contributions on its
   profile.
+- **All-time contributions.** GraphQL caps a `contributionsCollection` range at one year, so the
+  generator reads `contributionYears` from the profile query, then issues a single second query with
+  one aliased collection per year (`y2021`, `y2022`, …) covering 1 January to 31 December of each,
+  and sums `contributionCalendar.totalContributions`. The union of `contributionYears`, the account
+  creation year and the current year guarantees no year is skipped. It is the same contribution
+  model as the calendar — commits to the default branch of repositories the account can contribute
+  to, opened issues, opened pull requests, pull request reviews and repository creation — just
+  summed over the account's whole life instead of a rolling window. Two consequences worth knowing:
+  it inherits the private-contribution rule below, and it is not a commit count.
 - **Streaks.** Current and longest streaks are computed from the twelve-month calendar in this
   repository, not fetched from GitHub. They therefore cannot report a streak that started before the
   window opens. The current streak tolerates an empty final day, because the current UTC day may not
@@ -352,8 +371,15 @@ invalid logins and non-hex colours, and clamps numeric settings into usable rang
 | `theme`          | Dark and light palettes, contribution ramp, typography and spacing.                                                                                                                                       |
 
 `personal.codingSince` drives the `UPTIME` row and defaults to the GitHub join date. Set it to when
-you actually started writing code. `personal.languages` is for spoken languages and is empty by
-default; leave it empty to hide the row.
+you actually started writing code. `personal.languages` is for spoken languages.
+
+Durations are written out in full (`5 years 8 days`, `1 year 1 month 1 day`) by `formatDuration` in
+`src/utils/dates.ts`, which pluralises each unit independently and omits units that are zero.
+
+The `whoami --system` block is not a table. `TerminalKeyValue` renders it as command output: a
+lowercase key, a dotted leader padded to one shared field width, then the value. Keys use the muted
+tone, leaders the border tone and values the primary tone, so the three read as a hierarchy rather
+than as columns of a grid.
 
 ## Output validation
 

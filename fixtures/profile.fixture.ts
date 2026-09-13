@@ -88,7 +88,7 @@ export const fixtureProfileData: ProfileData = {
     { label: 'EMAIL', value: 'octo@fixture.example' },
     { label: 'WEBSITE', value: 'fixture.example' },
     { label: 'LANGUAGES', value: 'English / Slovak' },
-    { label: 'UPTIME', value: '4y 5m 9d' },
+    { label: 'UPTIME', value: '4 years 5 months 9 days' },
     { label: 'JOINED', value: 'Apr 02, 2019' },
   ],
   stats: {
@@ -102,6 +102,8 @@ export const fixtureProfileData: ProfileData = {
     issuesOpened: 64,
     contributionsLastYear: calendar.total,
     contributionsThisYear: 843,
+    contributionsAllTime: 5312,
+    contributionYearsCovered: 8,
     commitContributionsLastYear: 1204,
     activeDaysLastYear: calendar.activeDays,
     privateContributionsIncluded: true,

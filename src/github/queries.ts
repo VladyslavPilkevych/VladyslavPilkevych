@@ -16,6 +16,7 @@ query ProfileOverview($login: String!, $yearStart: DateTime!, $now: DateTime!) {
     pullRequests { totalCount }
     issues { totalCount }
     lastYear: contributionsCollection {
+      contributionYears
       totalCommitContributions
       restrictedContributionsCount
       contributionCalendar {
@@ -69,3 +70,15 @@ query ProfileRepositories($login: String!, $cursor: String) {
   }
 }
 `;
+
+export function buildAllTimeQuery(years: number[]): string {
+  const fields = years
+    .map(
+      (year) =>
+        `    y${String(year)}: contributionsCollection(` +
+        `from: "${String(year)}-01-01T00:00:00Z", to: "${String(year)}-12-31T23:59:59Z") ` +
+        `{ contributionCalendar { totalContributions } }`,
+    )
+    .join('\n');
+  return `query AllTimeContributions($login: String!) {\n  user(login: $login) {\n${fields}\n  }\n}`;
+}

@@ -136,10 +136,27 @@ describe('animated document', () => {
     expect(animated).not.toMatch(/\son[a-z]+=/i);
   });
 
-  it('keeps only a handful of indefinite loops', () => {
+  it('loops idle animation without letting it run away', () => {
     const loops = animated.match(/repeatCount="indefinite"/g) ?? [];
     expect(loops.length).toBeGreaterThan(0);
-    expect(loops.length).toBeLessThanOrEqual(8);
+    expect(loops.length).toBeLessThanOrEqual(450);
+  });
+
+  it('never animates a text run, so nothing readable blinks', () => {
+    const textNodes = animated.match(/<text\b[^>]*>[\s\S]*?<\/text>/g) ?? [];
+    expect(textNodes.length).toBeGreaterThan(50);
+    for (const node of textNodes) {
+      expect(node).not.toContain('<animate');
+    }
+  });
+
+  it('drives the moving network pulses with animateMotion along real paths', () => {
+    const motions = animated.match(/<animateMotion\b[^>]*>/g) ?? [];
+    expect(motions.length).toBeGreaterThan(0);
+    for (const node of motions) {
+      expect(node).toContain('path="M ');
+      expect(node).toContain('repeatCount="indefinite"');
+    }
   });
 
   it('freezes every non-looping animation on its final value', () => {
@@ -151,7 +168,7 @@ describe('animated document', () => {
   });
 
   it('stays a reasonable size', () => {
-    expect(animated.length).toBeLessThan(140_000);
+    expect(animated.length).toBeLessThan(170_000);
   });
 
   it('is deterministic', () => {

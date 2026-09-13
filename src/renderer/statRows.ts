@@ -24,13 +24,19 @@ export function buildStatRows(stats: GitHubStats, year: number): StatRow[] {
     {
       label: 'contributions / last 12m',
       value: formatCount(stats.contributionsLastYear),
-      emphasis: true,
     },
     stats.contributionsThisYear === null
       ? null
       : {
           label: `contributions / ${String(year)}`,
           value: formatCount(stats.contributionsThisYear),
+        },
+    stats.contributionsAllTime === null
+      ? null
+      : {
+          label: 'contributions / all time',
+          value: formatCount(stats.contributionsAllTime),
+          emphasis: true,
         },
   ];
   return rows.filter((row): row is StatRow => row !== null);

@@ -1,7 +1,7 @@
 import type { ContributionCalendar, Identity } from '../data/types.ts';
 import { GitHubApiError, type GitHubClient } from './client.ts';
 import { buildCalendar, parsePublicCalendar, type RawContributionDay } from './contributions.ts';
-import { PROFILE_QUERY } from './queries.ts';
+import { PROFILE_QUERY, buildAllTimeQuery } from './queries.ts';
 
 export interface ProfileBundle {
   identity: Identity;
@@ -9,6 +9,8 @@ export interface ProfileBundle {
   pullRequestsOpened: number | null;
   issuesOpened: number | null;
   contributionsThisYear: number | null;
+  contributionsAllTime: number | null;
+  contributionYears: number[];
   commitContributionsLastYear: number | null;
   restrictedContributionsLastYear: number | null;
   privateContributionsIncluded: boolean;
@@ -32,6 +34,7 @@ interface GraphQlProfileResponse {
     pullRequests: { totalCount: number };
     issues: { totalCount: number };
     lastYear: {
+      contributionYears: number[];
       totalCommitContributions: number;
       restrictedContributionsCount: number;
       contributionCalendar: {
@@ -111,6 +114,7 @@ async function fetchViaGraphQl(
     }
   }
 
+  const years = normalizeContributionYears(user.lastYear.contributionYears, user.createdAt, now);
   const privateIncluded = data.viewer.login.toLowerCase() === user.login.toLowerCase();
   const notes: string[] = [];
   if (!privateIncluded) {
@@ -135,6 +139,8 @@ async function fetchViaGraphQl(
       publicRepositories: user.publicRepositories.totalCount,
     },
     calendar: buildCalendar(rawDays, 'graphql'),
+    contributionsAllTime: await fetchAllTimeContributions(client, login, years),
+    contributionYears: years,
     pullRequestsOpened: user.pullRequests.totalCount,
     issuesOpened: user.issues.totalCount,
     contributionsThisYear: user.thisYear.contributionCalendar.totalContributions,
@@ -174,6 +180,8 @@ async function fetchViaPublicApis(client: GitHubClient, login: string): Promise<
     pullRequestsOpened,
     issuesOpened,
     contributionsThisYear: null,
+    contributionsAllTime: null,
+    contributionYears: [],
     commitContributionsLastYear: null,
     restrictedContributionsLastYear: null,
     privateContributionsIncluded: false,
@@ -182,6 +190,39 @@ async function fetchViaPublicApis(client: GitHubClient, login: string): Promise<
         'Commit-only and calendar-year contribution counters are unavailable in this mode.',
     ],
   };
+}
+
+export function normalizeContributionYears(
+  reported: number[],
+  createdAt: string,
+  now: Date,
+): number[] {
+  const firstYear = Number(createdAt.slice(0, 4));
+  const lastYear = now.getUTCFullYear();
+  const years = new Set<number>();
+  for (const year of reported) {
+    if (Number.isInteger(year) && year >= 2005 && year <= lastYear) years.add(year);
+  }
+  if (Number.isInteger(firstYear)) years.add(firstYear);
+  years.add(lastYear);
+  return [...years].sort((left, right) => left - right);
+}
+
+async function fetchAllTimeContributions(
+  client: GitHubClient,
+  login: string,
+  years: number[],
+): Promise<number | null> {
+  if (years.length === 0) return null;
+  const data = await client.graphql<{
+    user: Record<string, { contributionCalendar: { totalContributions: number } }> | null;
+  }>(buildAllTimeQuery(years), { login }, 'all-time contributions');
+  if (!data.user) return null;
+  let total = 0;
+  for (const year of years) {
+    total += data.user[`y${String(year)}`]?.contributionCalendar.totalContributions ?? 0;
+  }
+  return total;
 }
 
 async function countSearch(client: GitHubClient, query: string): Promise<number | null> {

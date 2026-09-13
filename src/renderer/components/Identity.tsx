@@ -4,8 +4,8 @@ import type { AsciiPortrait, IdentityField } from '../../data/types.ts';
 import type { Metrics } from '../layout.ts';
 import type { Motion } from '../animation.ts';
 import { AsciiAvatar, asciiAvatarHeight, asciiAvatarWidth } from './AsciiAvatar.tsx';
-import { TerminalTable, terminalTableHeight, type TableRow } from './TerminalTable.tsx';
-import { Text } from './primitives.tsx';
+import { TerminalKeyValue, terminalKeyValueHeight, type KeyValueRow } from './TerminalKeyValue.tsx';
+import { Rule, Text } from './primitives.tsx';
 
 export interface IdentityPanelProps {
   x: number;
@@ -26,17 +26,15 @@ export interface IdentityPanelProps {
 }
 
 export const PANEL_PADDING = 20;
-const PORTRAIT_GAP = 22;
-const KEY_COLUMNS = 13;
+const PORTRAIT_GAP = 24;
+const HANDLE_GAP = 12;
 
-function tableRows(fields: IdentityField[], palette: Palette): TableRow[] {
-  return fields.map((field) => ({
-    key: field.label,
-    cells: [
-      [{ text: field.label.toLowerCase(), fill: palette.accent }],
-      [{ text: field.value, fill: palette.text }],
-    ],
-  }));
+function keyValueRows(fields: IdentityField[]): KeyValueRow[] {
+  return fields.map((field) => ({ key: field.label.toLowerCase(), value: field.value }));
+}
+
+function contentHeight(fields: IdentityField[], metrics: Metrics): number {
+  return metrics.lineHeight + HANDLE_GAP + terminalKeyValueHeight(fields.length, metrics);
 }
 
 export function identityPanelHeight(
@@ -44,28 +42,26 @@ export function identityPanelHeight(
   fields: IdentityField[],
   metrics: Metrics,
 ): number {
-  const tableHeight = terminalTableHeight(fields.length, true, metrics);
   const portraitHeight = portrait ? asciiAvatarHeight(portrait, metrics) : 0;
-  return Math.max(tableHeight, portraitHeight) + PANEL_PADDING * 2;
+  return Math.max(contentHeight(fields, metrics), portraitHeight) + PANEL_PADDING * 2;
 }
 
 export function IdentityPanel(props: IdentityPanelProps): SvgElement {
   const { metrics, palette, motion, portrait } = props;
   const panelHeight = identityPanelHeight(portrait, props.fields, metrics);
-  const contentTop = props.y + PANEL_PADDING;
-  const contentHeight = panelHeight - PANEL_PADDING * 2;
+  const top = props.y + PANEL_PADDING;
+  const innerHeight = panelHeight - PANEL_PADDING * 2;
 
   const portraitWidth = portrait ? asciiAvatarWidth(portrait, metrics) : 0;
   const portraitHeight = portrait ? asciiAvatarHeight(portrait, metrics) : 0;
-  const portraitTop = contentTop + Math.max(0, (contentHeight - portraitHeight) / 2);
+  const portraitTop = top + Math.max(0, (innerHeight - portraitHeight) / 2);
 
   const dividerX = portrait ? props.x + PANEL_PADDING + portraitWidth + PORTRAIT_GAP : 0;
-  const tableX = portrait ? dividerX + PORTRAIT_GAP : props.x + PANEL_PADDING;
-  const tableWidth = props.x + props.width - PANEL_PADDING - tableX;
-  const tableHeight = terminalTableHeight(props.fields.length, true, metrics);
-  const tableTop = contentTop + Math.max(0, (contentHeight - tableHeight) / 2);
-
-  const valueColumns = Math.max(8, Math.floor(tableWidth / metrics.cellWidth) - KEY_COLUMNS);
+  const listX = portrait ? dividerX + PORTRAIT_GAP : props.x + PANEL_PADDING;
+  const listWidth = props.x + props.width - PANEL_PADDING - listX;
+  const blockHeight = contentHeight(props.fields, metrics);
+  const blockTop = top + Math.max(0, (innerHeight - blockHeight) / 2);
+  const handle = `${props.terminal.username}@${props.terminal.hostname}`;
 
   return (
     <g>
@@ -102,9 +98,9 @@ export function IdentityPanel(props: IdentityPanelProps): SvgElement {
         <g>
           <rect
             x={dividerX}
-            y={contentTop + 6}
+            y={top + 6}
             width={1}
-            height={Math.max(0, contentHeight - 12)}
+            height={Math.max(0, innerHeight - 12)}
             fill={palette.borderStrong}
             opacity={0.6}
           />
@@ -114,35 +110,33 @@ export function IdentityPanel(props: IdentityPanelProps): SvgElement {
 
       <g>
         <Text
-          x={tableX}
-          y={tableTop - 12}
-          value={`${props.terminal.username}@${props.terminal.hostname}`}
+          x={listX}
+          y={blockTop + metrics.fontSize}
+          value={handle}
           fill={palette.accent}
           cellWidth={metrics.cellWidth}
-          fontSize={metrics.fontSize - 2}
           weight={700}
+        />
+        <Rule
+          x={listX}
+          y={blockTop + metrics.lineHeight + 3}
+          width={listWidth}
+          color={palette.border}
+          opacity={0.8}
         />
         {motion.fadeIn(Math.max(0, props.begin - 0.1))}
       </g>
 
-      <TerminalTable
-        x={tableX}
-        y={tableTop}
-        width={tableWidth}
-        columns={[
-          { label: 'field', columns: KEY_COLUMNS },
-          { label: 'value', columns: valueColumns },
-        ]}
-        rows={tableRows(props.fields, palette)}
-        showHeader={true}
-        separator={true}
+      <TerminalKeyValue
+        x={listX}
+        y={blockTop + metrics.lineHeight + HANDLE_GAP}
+        width={listWidth}
+        rows={keyValueRows(props.fields)}
         metrics={metrics}
         palette={palette}
         motion={motion}
         begin={props.begin}
         stagger={props.stagger}
-        reveal="fade"
-        idPrefix="tp-identity"
       />
     </g>
   );

@@ -69,6 +69,10 @@ export function resolveConfig(config: ProfileConfig): ProfileConfig {
       normalizeClip: clamp(config.avatar.normalizeClip, 0, 0.2),
       subjectBoost: clamp(config.avatar.subjectBoost, 0, 1),
     },
+    stack: {
+      ...config.stack,
+      fanOut: Math.round(clamp(config.stack.fanOut, 1, 4)),
+    },
     github: {
       ...config.github,
       maxLanguages: Math.round(clamp(config.github.maxLanguages, 1, 16)),

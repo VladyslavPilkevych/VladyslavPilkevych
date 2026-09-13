@@ -9,14 +9,14 @@ const profileConfig: ProfileConfig = {
     email: 'vladyslav.pilkevych@gmail.com',
     phone: null,
     website: 'vladyslavpilkevych.com',
-    location: null,
+    location: 'Bratislava, Slovakia',
     company: null,
-    languages: [],
+    languages: ['Ukrainian', 'English', 'Slovak', 'Russian'],
     codingSince: '2021-09-05',
   },
 
   terminal: {
-    username: 'vlad',
+    username: 'vladyslavpilkevych',
     hostname: 'github',
     shell: 'zsh',
     promptSymbol: '$',
@@ -73,6 +73,8 @@ const profileConfig: ProfileConfig = {
       { label: 'backend', items: ['node', 'spring', 'sqlite'] },
       { label: 'tooling', items: ['git', 'docker', 'npm', 'pnpm', 'figma'] },
     ],
+    connections: [],
+    fanOut: 2,
   },
 
   animation: {
@@ -92,6 +94,11 @@ const profileConfig: ProfileConfig = {
     barFillStagger: 0.06,
     stackRevealDelay: 2.95,
     stackRowStagger: 0.09,
+    networkPulsePeriod: 3.6,
+    networkPulseStagger: 0.28,
+    contributionPulseBasePeriod: 3.4,
+    contributionPulseJitter: 1.6,
+    contributionPulseDepth: [0.94, 0.88, 0.8, 0.68],
     graphRevealDelay: 3.45,
     graphRevealDuration: 1.25,
     activityRevealDelay: 4.6,

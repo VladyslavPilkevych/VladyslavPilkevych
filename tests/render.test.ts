@@ -99,8 +99,8 @@ describe('section toggles', () => {
       },
       'dark',
     );
-    expect(dark).toContain('--list');
-    expect(withoutStack).not.toContain('--list');
+    expect(dark).toContain('--network');
+    expect(withoutStack).not.toContain('--network');
   });
 
   it('still renders a valid document with every optional section off', () => {
@@ -157,7 +157,9 @@ describe('buildIdentityFields', () => {
       identity,
       { year: 2026, month: 9, day: 11 },
     );
-    expect(fields.find((field) => field.label === 'UPTIME')?.value).toBe('4y 8m 10d');
+    expect(fields.find((field) => field.label === 'UPTIME')?.value).toBe(
+      '4 years 8 months 10 days',
+    );
   });
 
   it('takes the join date from GitHub rather than configuration', () => {
